@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -160,69 +160,142 @@ label.chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer;
 #lb .bar{display:flex;gap:8px}
 #lb .btn{background:#1B2540;color:#E7ECF6;border-color:#3A4A70}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom,0px));background:#16233B;color:#fff;padding:9px 14px;border-radius:4px;font-size:13px;z-index:70;max-width:90vw}
+
+/* ===== v3: чертёж на весь экран (альбом) / шторка (книжная) ===== */
+body{padding:0;overflow:auto}
+body.planmode{overflow:hidden}
+#top{display:flex;align-items:center;gap:8px;height:52px;padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;flex-wrap:nowrap}
+#top .ttl{font-weight:600;white-space:nowrap}
+#top .meta{max-width:22vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:1000px){#top .meta{display:none}}
+#top .grow{flex:1;min-width:0}
+#top .views{display:flex;gap:6px;flex:none}
+#top .status{white-space:nowrap;max-width:26vw;overflow:hidden;text-overflow:ellipsis}
+.ptabs{display:flex;gap:6px;overflow-x:auto;min-width:0;flex:0 1 auto;scrollbar-width:none}
+.ptabs::-webkit-scrollbar{display:none}
+.ptabs .btn{white-space:nowrap;flex:none}
+.work{position:relative;height:calc(100vh - 52px);height:calc(100dvh - 52px);overflow:hidden;background:var(--paper)}
+.work .scroll{position:absolute;inset:0;max-height:none;display:flex;overflow:auto}
+.work .stage{margin:auto;flex:none}
+.rail{position:absolute;left:max(8px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:12;max-height:calc(100% - 16px);overflow:auto}
+.rail .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;min-width:54px;padding:4px 2px;font-size:10px;line-height:1.1}
+.rail .btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rail .swatches{flex-direction:column;align-items:center;gap:8px;padding:6px 0}
+.rail hr{border:0;border-top:1px solid var(--line);margin:2px 0;width:100%}
+@media (max-height:640px){.rail .btn span{display:none}.rail .btn{min-height:40px}}
+.work .hintbar{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:12;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;max-width:62%;min-height:0;box-shadow:var(--shadow)}
+.work[data-mode="sel"] .hintbar{display:none}
+.work .symbar{position:absolute;left:calc(max(8px,env(safe-area-inset-left)) + 74px);right:10px;bottom:10px;flex-wrap:nowrap;overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:12}
+.work .symbar .btn{flex:none}
+.side{position:absolute;right:10px;top:10px;bottom:10px;width:min(400px,36%);min-width:300px;z-index:15;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);transform:translateX(calc(100% + 24px));transition:transform .18s;display:flex;flex-direction:column;overflow:hidden}
+.side.open{transform:none}
+.side .sidehead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid var(--line);flex:none}
+.side .sidehead .hd{width:36px;height:4px;border-radius:2px;background:var(--line);display:none}
+.side .card{border:0;box-shadow:none;border-radius:0;flex:1;min-height:0;overflow:auto;position:static;max-height:none}
+#sideTall{display:none}
+@media (orientation:portrait){
+  .work{display:flex;flex-direction:column}
+  .work .scroll{position:relative;inset:auto;flex:1;min-height:0;order:1}
+  .side{position:relative;right:auto;top:auto;bottom:auto;width:auto;min-width:0;order:2;transform:none;border-width:1px 0 0;border-radius:16px 16px 0 0;box-shadow:0 -4px 14px rgba(0,0,0,.12);height:44vh;height:44dvh;display:none;flex:none}
+  .side.open{display:flex}
+  .side.tall{height:82vh;height:82dvh}
+  .side .sidehead .hd{display:block}
+  #sideTall{display:inline-flex}
+  .work .symbar{bottom:8px;left:calc(max(8px,env(safe-area-inset-left)) + 74px)}
+}
+#drawer{position:fixed;inset:0;z-index:50;display:flex;justify-content:flex-end}
+#drawer .dback{position:absolute;inset:0;background:rgba(6,10,20,.5)}
+#drawer .dpanel{position:relative;width:min(560px,100%);height:100%;background:var(--panel);overflow:auto;display:flex;flex-direction:column;gap:12px;padding:14px max(14px,env(safe-area-inset-right)) 24px 14px;border-left:1px solid var(--line)}
+#drawer .dpanel>.row{align-items:center;justify-content:space-between}
+#drawer .list{border:1px solid var(--line);border-radius:8px}
+.work:not([data-mode="line"]):not([data-mode="free"]) .rail .swatches,.work:not([data-mode="line"]):not([data-mode="free"]) .rail hr:first-of-type{display:none}
+@media (orientation:portrait){.work.sheet-open .rail{top:calc((100% - 44dvh) / 2)}}
+#viewTz{margin:12px max(12px,env(safe-area-inset-right)) 40px max(12px,env(safe-area-inset-left))}
+.planname{flex:1 1 200px}
+
+.assist{margin-top:-4px}
+.flyout{position:absolute;z-index:14;display:flex;flex-direction:column;gap:2px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.flyout .btn{display:flex;align-items:center;gap:8px;justify-content:flex-start;min-height:44px;white-space:nowrap}
+.flyout svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pin.txt{background:var(--panel);color:var(--ink);border:2px solid var(--navy);border-radius:6px;padding:3px 9px;height:auto;min-height:26px;min-width:0;font:600 13px/1.25 var(--sans);white-space:pre-wrap;max-width:240px;transform:translate(-50%,-50%);display:block;text-align:left}
+.req{display:inline-block;font:600 11px/1 var(--sans);background:var(--warn);color:var(--warn-ink);border-radius:3px;padding:3px 6px;vertical-align:2px}
+.pbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--ok)}
+#viewWalk{margin:12px max(12px,env(safe-area-inset-right)) 40px max(12px,env(safe-area-inset-left))}
+#viewWalk .docbox{gap:10px}
+#viewWalk h2{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 0 0}
+#cam{position:fixed;inset:0;z-index:80;background:#000;display:flex;flex-direction:column}
+#cam video{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}
+#cam .camBar{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:#0B1220}
+#cam .camBar .btn{min-height:56px;min-width:120px;font-size:16px}
+#cam .camc{color:#E7ECF6;font:500 14px var(--sans);min-width:90px}
+#ped{position:fixed;inset:0;z-index:75;background:#0B1220;display:flex;flex-direction:column}
+#ped .pedbar{display:flex;gap:8px;align-items:center;padding:8px;flex-wrap:wrap;background:var(--panel)}
+#ped .pedwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px;overflow:auto}
+#ped canvas{max-width:100%;max-height:100%;touch-action:none;background:#fff;cursor:crosshair}
+#top .ttl{display:none}
+@media (min-width:1100px){#top .ttl{display:inline}}
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
-  <header>
-    <div>
-      <h1>Обследование и техническое задание</h1>
-      <div class="meta" id="meta"></div>
+<div id="app">
+  <header id="top">
+    <strong class="ttl">Обследование</strong>
+    <div class="ptabs" id="ptabs" role="tablist" aria-label="Чертежи"></div>
+    <span class="meta" id="meta"></span>
+    <span class="grow"></span>
+    <div class="views">
+      <button class="btn small" id="vPlan" aria-pressed="true">Чертёж</button>
+      <button class="btn small" id="vWalk" aria-pressed="false" title="Сводка готовности, чек-лист обхода, экспликация помещений">Обход</button>
+      <button class="btn small" id="vTz" aria-pressed="false" title="Техническое задание: СПС, СОУЭ, ВПВ, АУП">ТЗ</button>
+      <button class="btn small" id="btnList" title="Список маркеров, чертежи, сохранение копий">Список и файлы</button>
     </div>
-    <div class="views" role="tablist" aria-label="Раздел">
-      <button class="btn" id="vPlan" aria-pressed="true">Обследование (чертежи)</button>
-      <button class="btn" id="vTz" aria-pressed="false">ТЗ: СПС · СОУЭ · ВПВ · АУП</button>
-    </div>
-    <button class="btn small" id="btnInstall" hidden>Установить приложение</button>
+    <button class="btn small" id="btnInstall" hidden>Установить</button>
     <span class="status" id="status">Загрузка…</span>
   </header>
-  <div class="banner" id="banner" hidden></div>
 
-  <div class="layout" id="viewPlan">
-    <section class="sheet" aria-label="Чертёж">
-      <div class="planbar" id="planbar"></div>
-      <div class="tools" role="toolbar" aria-label="Инструменты">
-        <button class="btn" id="mSel" aria-pressed="true" title="Выбирать и перетаскивать маркеры">Выбрать</button>
-        <button class="btn" id="mPin" aria-pressed="false" title="Нажмите на чертеже, чтобы поставить маркер">＋ Маркер</button>
-        <button class="btn" id="mLine" aria-pressed="false" title="Ломаная: нажимайте точки, завершите двойным щелчком">Линия</button>
-        <button class="btn" id="mFree" aria-pressed="false" title="Линия от руки: ведите пальцем или мышью">От руки</button>
-        <button class="btn" id="mSym" aria-pressed="false" title="Условные знаки: узел, подключение 220 В, кондиционер, отключение вентиляции и др.">Знаки</button>
-        <div class="swatches" id="sws" role="group" aria-label="Цвет линии"></div>
-        <span class="sep"></span>
-        <button class="btn" id="zout" aria-label="Уменьшить">−</button>
-        <button class="btn" id="zfit">Вписать</button>
-        <button class="btn" id="zin" aria-label="Увеличить">＋</button>
-        <button class="btn" id="lblBtn" aria-pressed="true">Подписи</button>
+  <div class="work" id="viewPlan" data-mode="sel">
+    <div class="scroll" id="scroll">
+      <div class="stage" id="stage">
+        <img id="planImg" alt="Чертёж">
+        <svg id="ov" viewBox="0 0 1200 570" preserveAspectRatio="none"></svg>
+        <div id="pins"></div>
+        <div id="cap"><svg viewBox="0 0 1200 570" preserveAspectRatio="none" id="capSvg"></svg></div>
       </div>
-      <div class="symbar" id="symbar" hidden></div>
-      <div class="hintbar" id="hint"></div>
-      <div class="scroll" id="scroll">
-        <div class="stage" id="stage">
-          <img id="planImg" alt="Чертёж">
-          <svg id="ov" viewBox="0 0 1200 570" preserveAspectRatio="none"></svg>
-          <div id="pins"></div>
-          <div id="cap"><svg viewBox="0 0 1200 570" preserveAspectRatio="none" id="capSvg"></svg></div>
-        </div>
-      </div>
-      <div class="list">
-        <h2>Маркеры на этом чертеже</h2><div class="chips" id="chPins"></div>
-        <h2>Линии на этом чертеже</h2><div class="chips" id="chLines"></div>
-        <h2>Заметки без привязки к чертежу</h2><div class="chips" id="chNotes"></div>
-        <div class="row"><button class="btn small" id="addNote">＋ Заметка</button></div>
-      </div>
-      <div class="list">
-        <h2>Сохранить копию</h2>
-        <div class="row">
-          <button class="btn small" id="exPng">Чертёж с маркерами (PNG)</button>
-          <button class="btn small" id="exCsv">Таблица (CSV)</button>
-          <button class="btn small" id="exJson">Резервная копия (JSON)</button>
-          <label class="btn small" for="imJson">Загрузить копию</label>
-          <input type="file" id="imJson" accept="application/json,.json" hidden>
-        </div>
-      </div>
-    </section>
-    <aside class="card" id="card" aria-live="polite"></aside>
+    </div>
+    <div class="rail" id="rail" role="toolbar" aria-label="Инструменты">
+      <button class="btn" id="mSel" aria-pressed="true" title="Выбирать и перетаскивать маркеры"><svg viewBox="0 0 24 24"><path d="M5 3l14 7-6 2-2 6z"/></svg><span>Выбрать</span></button>
+      <button class="btn" id="mPin" aria-pressed="false" title="Нажмите на чертеже, чтобы поставить маркер"><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 0112 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg><span>Маркер</span></button>
+      <button class="btn" id="mPinPh" aria-pressed="false" title="Поставить маркер и сразу снять фото"><svg viewBox="0 0 24 24"><path d="M5 8h3l1.5-2h5L16 8h3v10H5z"/><circle cx="12" cy="13" r="3"/></svg><span>Маркер+фото</span></button>
+      <button class="btn" id="mDraw" aria-pressed="false" title="Линия, от руки, стрелка, зона, текст"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/></svg><span>Рисовать</span></button>
+      <button class="btn" id="mSym" aria-pressed="false" title="Условные знаки"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><circle cx="17" cy="7.5" r="3.5"/><path d="M4 20l3.5-6 3.5 6z"/></svg><span>Знаки</span></button>
+      <div class="swatches" id="sws" role="group" aria-label="Цвет линии"></div>
+      <hr>
+      <button class="btn" id="zin" aria-label="Увеличить"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"/></svg><span>Ближе</span></button>
+      <button class="btn" id="zout" aria-label="Уменьшить"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M8 11h6"/></svg><span>Дальше</span></button>
+      <button class="btn" id="zfit" title="Вписать чертёж в экран"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Вписать</span></button>
+      <button class="btn" id="lblBtn" aria-pressed="true" title="Подписи у маркеров"><svg viewBox="0 0 24 24"><path d="M4 12l8-8h8v8l-8 8z"/><circle cx="15" cy="9" r="1.2"/></svg><span>Подписи</span></button>
+      <button class="btn" id="mLock" aria-pressed="false" title="Закрепить маркеры: не сдвинутся при касании"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg><span>Закрепить</span></button>
+    </div>
+    <div class="flyout" id="drawMenu" hidden>
+      <button class="btn" id="mLine" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 18l6-8 4 4 6-9"/><circle cx="4" cy="18" r="1.4"/><circle cx="20" cy="5" r="1.4"/></svg>Линия</button>
+      <button class="btn" id="mFree" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20c4-1 4-9 8-9s2 7 8 3"/></svg>От руки</button>
+      <button class="btn" id="mArrow" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20L19 5M10 5h9v9"/></svg>Стрелка</button>
+      <button class="btn" id="mZone" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 7l9-3 5 6-3 9-9 1z"/></svg>Зона (контур)</button>
+      <button class="btn" id="mText" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13M9 19h6"/></svg>Текст</button>
+    </div>
+    <div class="symbar" id="symbar" hidden></div>
+    <div class="hintbar" id="hint"></div>
+    <aside class="side" id="side" aria-label="Карточка">
+      <div class="sidehead"><span class="hd"></span><button class="btn small" id="sideTall">Развернуть</button><button class="btn small" id="sideClose">Закрыть</button></div>
+      <div class="card" id="card" aria-live="polite"></div>
+    </aside>
   </div>
+
+  <section class="sheet tzs" id="viewWalk" hidden aria-label="Обход">
+    <div class="tabs" id="walkTabs"></div>
+    <div class="docbox" id="walkBody"></div>
+  </section>
 
   <section class="sheet tzs" id="viewTz" hidden aria-label="Техническое задание">
     <div class="tabs" id="tzTabs"></div>
@@ -230,10 +303,54 @@ label.chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer;
   </section>
 </div>
 
+<div id="drawer" hidden>
+  <div class="dback" id="dback"></div>
+  <div class="dpanel">
+    <div class="row"><h2 style="font-size:15px;color:var(--ink);text-transform:none;letter-spacing:0">Список и файлы</h2><button class="btn small" id="drawClose">Закрыть</button></div>
+    <div class="banner" id="banner" hidden></div>
+    <div class="list" id="planedit"></div>
+    <div class="list">
+      <h2>Маркеры на этом чертеже</h2><div class="chips" id="chPins"></div>
+      <h2>Линии на этом чертеже</h2><div class="chips" id="chLines"></div>
+      <h2>Заметки без привязки к чертежу</h2><div class="chips" id="chNotes"></div>
+      <div class="row"><button class="btn small" id="addNote">＋ Заметка</button></div>
+    </div>
+    <div class="list">
+      <h2>Сохранить копию</h2>
+      <div class="row">
+        <button class="btn small" id="exPng">Чертёж с маркерами (PNG)</button>
+        <button class="btn small" id="exCsv">Таблица (CSV)</button>
+        <button class="btn small" id="exJson">Резервная копия (JSON)</button>
+        <label class="btn small" for="imJson">Загрузить копию</label>
+        <input type="file" id="imJson" accept="application/json,.json" hidden>
+      </div>
+    </div>
+    <div class="list" id="prefsBox"></div>
+    <div class="list" id="helpBox"></div>
+  </div>
+</div>
+
 <div id="lb" hidden role="dialog" aria-modal="true" aria-label="Фото">
   <img id="lbImg" alt="">
   <div class="cap" id="lbCap"></div>
   <div class="bar"><button class="btn" id="lbPrev">← Назад</button><button class="btn" id="lbNext">Вперёд →</button><button class="btn" id="lbClose">Закрыть</button></div>
+</div>
+<div id="cam" hidden>
+  <video id="camVideo" playsinline muted autoplay></video>
+  <div class="camBar"><span class="camc" id="camCount"></span><button class="btn" id="camShot">Снять</button><button class="btn" id="camDone">Готово</button></div>
+</div>
+<input type="file" id="camInput" accept="image/*" capture="environment" multiple hidden>
+<div id="ped" hidden>
+  <div class="pedbar">
+    <button class="btn small" id="pedArrow" aria-pressed="true">Стрелка</button>
+    <button class="btn small" id="pedCrop" aria-pressed="false">Обрезка</button>
+    <button class="btn small" id="pedApply" hidden>Применить обрезку</button>
+    <button class="btn small" id="pedUndo">Отменить</button>
+    <span style="flex:1"></span>
+    <button class="btn small" id="pedSave">Сохранить</button>
+    <button class="btn small" id="pedClose">Закрыть</button>
+  </div>
+  <div class="pedwrap"><canvas id="pedCv"></canvas></div>
 </div>
 <div id="toast" hidden></div>
 <input type="file" id="planAdd" accept="image/*,application/pdf,.pdf" multiple hidden>
@@ -284,7 +401,7 @@ function symDataUrl(id){
   });
   return symCache[id];
 }
-function pinNum(p){ return p.num||(p.sym?symInfo(p.sym).g:''); }
+function pinNum(p){ return p.num||(p.txt?'Т':(p.sym?symInfo(p.sym).g:'')); }
 function pinLabel(p){ return p.title||(p.sym?symInfo(p.sym).name:''); }
 var $ = function(id){return document.getElementById(id)};
 function el(tag,cls,html){var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e}
@@ -293,7 +410,7 @@ function ml(s){ return esc(s).replace(/\r?\n/g,'<br>'); }
 function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function sysName(id){ for(var i=0;i<SYS.length;i++) if(SYS[i][0]===id) return SYS[i][1]; return id; }
 
-var S = { pins:{}, lines:{}, plans:{}, tzm:{}, planId:'plan0', sel:null, mode:'sel', symId:'node1', color:COLORS[0][0], z:1, draft:null, readOnly:false, store:'local', view:'plan', tzTab:0,tzDoc:null, docOpt:{photos:true,plans:true} };
+var S = { pins:{}, lines:{}, plans:{}, tzm:{}, planId:'plan0', sel:null, mode:'sel', fit:true, walkTab:'sum', pinPhoto:false, lineKind:'line', locked:false, stampSrc:null, symId:'node1', color:COLORS[0][0], z:1, draft:null, readOnly:false, store:'local', view:'plan', tzTab:0,tzDoc:null, docOpt:{photos:true,plans:true} };
 var db=null, assets=null, downloads=null, userCap=null, colls={};
 var dirty={}, inflight={}, timers={};
 
@@ -379,11 +496,19 @@ function loadPlanImage(){
 $('planImg').addEventListener('load',function(){
   var p=curPlan(); if(!p) return;
   if(!p.w||!p.h){ p.w=this.naturalWidth; p.h=this.naturalHeight; }
-  applyViewBox(this.naturalWidth,this.naturalHeight); renderOverlay();
+  applyViewBox(this.naturalWidth,this.naturalHeight); renderOverlay(); if(S.fit) fitPlan();
 });
+function fitPlan(){
+  var sc=$('scroll'), p=curPlan(), im=$('planImg');
+  var nw=(p&&p.w)||im.naturalWidth, nh=(p&&p.h)||im.naturalHeight;
+  if(!nw||!nh||!sc.clientWidth||!sc.clientHeight) return;
+  var z=Math.min(1,sc.clientHeight/(sc.clientWidth*nh/nw));
+  S.z=Math.max(.25,z); S.fit=true; $('stage').style.width=(S.z*100)+'%';
+  sc.scrollLeft=0; sc.scrollTop=0;
+}
 function setPlan(id){
   if(!S.plans[id]) return;
-  cancelDraft(); S.planId=id; S.sel=null; loadPlanImage(); renderPlanBar(); renderAll(); updateMeta();
+  cancelDraft(); S.planId=id; S.sel=null; loadPlanImage(); renderPlanBar(); renderAll(); updateMeta(); if(S.fit) setTimeout(fitPlan,0);
   if(S.store==='local') saveSoon('plans',id);
 }
 function updateMeta(){
@@ -391,25 +516,26 @@ function updateMeta(){
   $('meta').textContent=(t?t+' · ':'Обследование · ')+'чертёж «'+(p?p.name:'—')+'»';
 }
 function renderPlanBar(){
-  var h=$('planbar'); h.innerHTML='';
-  h.appendChild(el('span','lead','Чертёж'));
+  var t=$('ptabs'); t.innerHTML='';
   var list=plansSorted();
   list.forEach(function(p){
     var b=el('button','btn small',esc(p.name||'Без названия')); b.setAttribute('aria-pressed',p.id===S.planId?'true':'false');
-    b.addEventListener('click',function(){ setPlan(p.id); }); h.appendChild(b);
+    b.addEventListener('click',function(){ setPlan(p.id); }); t.appendChild(b);
   });
   var add=el('label','btn small','＋ Чертёж'); add.setAttribute('for','planAdd'); add.title='Добавить чертёж: изображение (PNG, JPG) или PDF (каждая страница — отдельный чертёж)';
-  if(S.readOnly){ add.style.opacity='.45'; add.style.pointerEvents='none'; } h.appendChild(add);
-  h.appendChild(el('span','sep'));
+  if(S.readOnly){ add.style.opacity='.45'; add.style.pointerEvents='none'; } t.appendChild(add);
+  var h=$('planedit'); h.innerHTML=''; h.appendChild(el('h2',null,'Текущий чертёж'));
   var p=curPlan(); if(!p) return;
-  var nm=el('input','pname'); nm.type='text'; nm.value=p.name||''; nm.placeholder='Название чертежа'; nm.setAttribute('aria-label','Название чертежа'); nm.disabled=S.readOnly;
+  var row=el('div','row');
+  var nm=el('input','planname'); nm.type='text'; nm.value=p.name||''; nm.placeholder='Название чертежа'; nm.setAttribute('aria-label','Название чертежа'); nm.disabled=S.readOnly;
   nm.addEventListener('input',function(){ p.name=nm.value; p.upd=Date.now(); saveSoon('plans',p.id); updateMeta();
-    var act=h.querySelector('button[aria-pressed="true"]'); if(act) act.textContent=p.name||'Без названия'; });
-  h.appendChild(nm);
+    var act=t.querySelector('button[aria-pressed="true"]'); if(act) act.textContent=p.name||'Без названия'; });
+  row.appendChild(nm);
   var rp=el('label','btn small','Заменить изображение'); rp.setAttribute('for','planRepl'); rp.title='Подставить другой файл под тот же чертёж: маркеры и линии останутся на своих местах (в долях чертежа)';
-  if(S.readOnly){ rp.style.opacity='.45'; rp.style.pointerEvents='none'; } h.appendChild(rp);
+  if(S.readOnly){ rp.style.opacity='.45'; rp.style.pointerEvents='none'; } row.appendChild(rp);
   var del=el('button','btn small danger','Удалить чертёж'); del.disabled=S.readOnly||list.length<2; del.title=list.length<2?'Нельзя удалить единственный чертёж':'';
-  confirmDelete(del,function(){ deletePlan(p); }); h.appendChild(del);
+  confirmDelete(del,function(){ deletePlan(p); }); row.appendChild(del);
+  h.appendChild(row);
 }
 function deletePlan(p){
   var ids=Object.keys(S.pins).filter(function(k){return S.pins[k].planId===p.id&&S.pins[k].fx!=null});
@@ -536,7 +662,7 @@ function newSym(symId,fx,fy){
   S.pins[p.id]=p; saveSoon('pins',p.id); return p;
 }
 function newLine(pts){
-  var l={id:uid('l'),pts:pts,label:'',color:S.color,planId:S.planId,comments:[],upd:Date.now()};
+  var l={id:uid('l'),pts:pts,kind:S.lineKind||'line',label:'',color:S.color,planId:S.planId,comments:[],upd:Date.now()};
   S.lines[l.id]=l; saveSoon('lines',l.id); return l;
 }
 function getSel(){ return S.pins[S.sel]||S.lines[S.sel]||null; }
@@ -549,10 +675,18 @@ function renderOverlay(){
   Object.keys(S.lines).forEach(function(id){
     var l=S.lines[id]; if(!l.pts||l.pts.length<2||!onPlan(l)) return;
     var pts=l.pts.map(function(p){return (p[0]*VBW).toFixed(1)+','+(p[1]*VBH).toFixed(1)}).join(' ');
-    var vis=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    var zone=l.kind==='zone', NSV='http://www.w3.org/2000/svg';
+    var vis=document.createElementNS(NSV,zone?'polygon':'polyline');
     vis.setAttribute('points',pts); vis.setAttribute('class','vis'+(S.sel===id?' sel':'')); vis.setAttribute('stroke',l.color||'#FF7800'); vis.setAttribute('stroke-width',S.sel===id?'5':'3.5');
+    if(zone){ vis.style.fill=l.color||'#FF7800'; vis.style.fillOpacity='.16'; }
     ov.appendChild(vis);
-    var hit=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    if(l.kind==='arrow'){
+      var pa=l.pts[l.pts.length-2], pb=l.pts[l.pts.length-1], ax=pa[0]*VBW, ay=pa[1]*VBH, bx=pb[0]*VBW, by=pb[1]*VBH, an=Math.atan2(by-ay,bx-ax), HL=17;
+      var head=document.createElementNS(NSV,'polygon');
+      head.setAttribute('points',bx.toFixed(1)+','+by.toFixed(1)+' '+(bx-HL*Math.cos(an-.45)).toFixed(1)+','+(by-HL*Math.sin(an-.45)).toFixed(1)+' '+(bx-HL*Math.cos(an+.45)).toFixed(1)+','+(by-HL*Math.sin(an+.45)).toFixed(1));
+      head.style.fill=l.color||'#FF7800'; head.style.pointerEvents='none'; ov.appendChild(head);
+    }
+    var hit=document.createElementNS(NSV,zone?'polygon':'polyline');
     hit.setAttribute('points',pts); hit.setAttribute('class','hit');
     hit.addEventListener('click',function(e){ if(S.mode==='sel'){ e.stopPropagation(); select(id,false); } });
     ov.appendChild(hit);
@@ -568,14 +702,14 @@ function renderOverlay(){
   var host=$('pins'); host.innerHTML='';
   Object.keys(S.pins).forEach(function(id){
     var p=S.pins[id]; if(p.fx==null||!onPlan(p)) return;
-    var b=el('button','pin'+(p.sym?' sym':'')); if(p.sym) b.style.setProperty('--symc',symInfo(p.sym).color);
+    var b=el('button','pin'+(p.sym?' sym':'')+(p.txt?' txt':'')); if(p.sym) b.style.setProperty('--symc',symInfo(p.sym).color);
     b.style.left=(p.fx*100)+'%'; b.style.top=(p.fy*100)+'%';
     b.setAttribute('aria-pressed',S.sel===id?'true':'false');
     b.setAttribute('aria-label',(p.sym?'Знак ':'Маркер ')+pinNum(p)+(pinLabel(p)?': '+pinLabel(p):''));
-    var inner=p.sym?symIcon(p.sym):esc(p.num||'•');
+    var inner=p.txt?esc(p.title||'Текст'):(p.sym?symIcon(p.sym):esc(p.num||'•'));
     if(p.unsure) inner+='<span class="q">?</span>';
     if(p.comments&&p.comments.length) inner+='<span class="cm">'+p.comments.length+'</span>';
-    if(pinLabel(p)) inner+='<span class="lbl">'+esc(pinLabel(p))+'</span>';
+    if(!p.txt&&pinLabel(p)) inner+='<span class="lbl">'+esc(pinLabel(p))+'</span>';
     b.innerHTML=inner; b.dataset.id=id;
     attachPinDrag(b,id);
     host.appendChild(b);
@@ -590,7 +724,7 @@ function attachPinDrag(b,id){
   b.addEventListener('pointermove',function(e){
     if(!drag) return;
     if(!drag.moved && Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<5) return;
-    if(S.readOnly) return;
+    if(S.readOnly||S.locked) return;
     drag.moved=true;
     var r=$('stage').getBoundingClientRect();
     var fx=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)), fy=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));
@@ -608,7 +742,7 @@ function attachPinDrag(b,id){
 function chip(host,id,num,title,unsure){
   var c=el('button','chip','<b>'+esc(num)+'</b><span class="t">'+esc(title||'без названия')+'</span>'+(unsure?'<span style="background:var(--warn);color:#1B1B1B;border-radius:50%;width:15px;height:15px;font:700 10px/15px sans-serif;text-align:center">?</span>':''));
   c.setAttribute('aria-pressed',S.sel===id?'true':'false');
-  c.addEventListener('click',function(){select(id,true)});
+  c.addEventListener('click',function(){select(id,true); closeDrawer();});
   host.appendChild(c);
 }
 function numSort(a,b){ var x=parseFloat(a.num),y=parseFloat(b.num); if(isNaN(x)&&isNaN(y)) return String(a.num).localeCompare(String(b.num)); if(isNaN(x)) return 1; if(isNaN(y)) return -1; return x-y; }
@@ -618,7 +752,7 @@ function renderLists(){
   pins.forEach(function(p){ if(p.fx!=null){ if(onPlan(p)) chip(a,p.id,pinNum(p),pinLabel(p),p.unsure); } else chip(c,p.id,pinNum(p)||'№',pinLabel(p),p.unsure); });
   if(!a.children.length) a.appendChild(el('p','empty','На этом чертеже маркеров пока нет. Нажмите «＋ Маркер», затем место на чертеже.'));
   var li=0;
-  Object.keys(S.lines).forEach(function(k){ var l=S.lines[k]; if(!onPlan(l)) return; li++; var cl=el('button','chip','<span class="dot" style="background:'+esc(l.color)+'"></span><span class="t">'+esc(l.label||('Линия '+li))+'</span>'); cl.setAttribute('aria-pressed',S.sel===k?'true':'false'); cl.addEventListener('click',function(){select(k,true)}); b.appendChild(cl); });
+  Object.keys(S.lines).forEach(function(k){ var l=S.lines[k]; if(!onPlan(l)) return; li++; var cl=el('button','chip','<span class="dot" style="background:'+esc(l.color)+'"></span><span class="t">'+esc(l.label||('Линия '+li))+'</span>'); cl.setAttribute('aria-pressed',S.sel===k?'true':'false'); cl.addEventListener('click',function(){select(k,true); closeDrawer();}); b.appendChild(cl); });
   if(!b.children.length) b.appendChild(el('p','empty','Линий нет. Инструмент «Линия» или «От руки».'));
   if(!c.children.length) c.appendChild(el('p','empty','Заметок нет.'));
 }
@@ -626,19 +760,26 @@ function renderLists(){
 /* ---------- rendering: card ---------- */
 function field(label,node){ var l=el('label','f'); l.appendChild(el('span',null,esc(label))); l.appendChild(node); return l; }
 function bindText(node,item,key,after){ node.value=item[key]||''; node.addEventListener('input',function(){ item[key]=node.value; item.upd=Date.now(); saveSoon(kindOf(item),item.id); if(after) after(); }); node.disabled=S.readOnly; }
+function renderHelp(){
+  var h=$('helpBox'); h.innerHTML=''; h.appendChild(el('h2',null,'Как пользоваться'));
+  var ul=el('ol','help');
+  ['<b>Чертежи</b>: вкладки сверху. «＋ Чертёж» добавляет изображение или PDF; в «Список и файлы» чертёж можно переименовать, заменить или удалить.',
+   '<b>Маркер</b>: инструмент слева, затем нажмите на чертеже. Карточка выезжает справа (в книжной ориентации — снизу). Отметьте системы СПС/СОУЭ/ВПВ/АУП — замечание попадёт в ТЗ.',
+   '<b>Линия</b>: нажимайте точки, двойной щелчок завершает. <b>От руки</b>: ведите пальцем. <b>Знаки</b>: выберите знак внизу и нажимайте на чертеже.',
+   '<b>Масштаб</b>: щипок двумя пальцами или кнопки слева; «Вписать» возвращает чертёж целиком.',
+   '<b>ТЗ</b>: кнопка вверху. Создайте ТЗ по шаблону и отвечайте на вопросы; на маркеры можно сослаться в ответе.',
+   '<b>Маркер+фото</b>: ставите точку, открывается камера, можно снять серию. <b>Рисовать</b>: линия, от руки, стрелка, зона, текст. <b>Закрепить</b> — маркеры не сдвинутся случайно.',
+   '<b>Фразы и диктовка</b> под полями ввода. Набор фраз меняется в панели «Список и файлы». <b>Правка</b> у фото: обрезка и стрелки.',
+   '<b>Обход</b> (вверху): сводка готовности ТЗ, чек-лист точек обхода, экспликация помещений.',
+   'Копию ведите регулярно: «Резервная копия (JSON)» сохраняет чертежи, маркеры, фото и ТЗ.'].forEach(function(t){ ul.appendChild(el('li',null,t)); });
+  h.appendChild(ul);
+}
 function renderCard(){
   var card=$('card'); card.innerHTML='';
   var it=getSel();
-  if(!it){
-    card.appendChild(el('h2',null,'Как пользоваться'));
-    var ul=el('ol','help');
-    ['<b>Чертежи</b>: переключайтесь вкладками над планом. «＋ Чертёж» добавляет изображение или PDF, «Заменить изображение» подставляет другой файл под тот же чертёж.',
-     '<b>＋ Маркер</b>: нажмите на чертеже. Номер, название и описание заполняются справа. Отметьте, к каким системам относится замечание (СПС, СОУЭ, ВПВ, АУП) — оно попадёт в ТЗ.',
-     '<b>Линия</b>: нажимайте точки на чертеже, двойной щелчок завершает. <b>От руки</b>: ведите пальцем или мышью.',
-     '<b>ТЗ</b>: вкладка вверху страницы. Создайте ТЗ по шаблону (проектирование СПС.СОУЭ, модернизация СПС.СОУЭ, АУП и ВПВ), отвечайте на вопросы; на маркеры обследования можно сослаться в ответе. Готовое ТЗ — печать/PDF или файл для Word.',
-     'Копию ведите регулярно: «Резервная копия (JSON)» сохраняет чертежи, маркеры, фото и ТЗ.'].forEach(function(t){ ul.appendChild(el('li',null,t)); });
-    card.appendChild(ul); return;
-  }
+  var open=!!it && S.mode!=='sym' && S.mode!=='stamp';
+  $('side').classList.toggle('open',open); $('viewPlan').classList.toggle('sheet-open',open);
+  if(!open){ return; }
   if(it.pts) return renderLineCard(card,it);
   var head=el('div','row');
   var num=el('input'); num.type='text'; num.className='num'; num.setAttribute('aria-label','Номер'); bindText(num,it,'num',function(){renderLists();renderOverlay()});
@@ -667,8 +808,8 @@ function renderCard(){
     ps.addEventListener('change',function(){ it.planId=ps.value; touch(it); setPlan(ps.value); select(it.id,true); });
     card.appendChild(field('Чертёж',ps));
   }
-  var d=el('textarea'); d.rows=4; d.placeholder='Что обнаружено, что видно на месте'; bindText(d,it,'desc'); card.appendChild(field('Что обнаружено',d));
-  var c=el('textarea'); c.rows=3; c.placeholder='Что должен учесть проектировщик'; bindText(c,it,'consider'); card.appendChild(field('Что учесть проектировщику',c));
+  var d=el('textarea'); d.rows=4; d.placeholder='Что обнаружено, что видно на месте'; bindText(d,it,'desc'); card.appendChild(field('Что обнаружено',d)); card.appendChild(assist(d));
+  var c=el('textarea'); c.rows=3; c.placeholder='Что должен учесть проектировщик'; bindText(c,it,'consider'); card.appendChild(field('Что учесть проектировщику',c)); card.appendChild(assist(c));
   var f=el('textarea'); f.rows=3; f.placeholder='Одна строка: название — значение\nнапример: Балка — 40 см'; bindText(f,it,'facts'); card.appendChild(field('Размеры и данные',f));
   var bs=el('input'); bs.type='text'; bs.placeholder='ФАКТ / ВЫВОД / СПЕКУЛЯЦИЯ и пояснение'; bindText(bs,it,'basis'); card.appendChild(field('Основание',bs));
   if(it.fx!=null){
@@ -678,6 +819,12 @@ function renderCard(){
     put.addEventListener('click',function(){ it.fx=.5; it.fy=.5; it.planId=S.planId; touch(it); renderCard(); toast('Маркер в центре чертежа. Перетащите его на место.'); });
     card.appendChild(put);
   }
+  if(it.fx!=null && !S.readOnly){
+    var cpb=el('button','btn small','Копировать на чертёж…'); cpb.title='Ставить копии этого маркера в нужные места';
+    cpb.addEventListener('click',function(){ S.stampSrc=it.id; setMode('stamp'); toast('Нажимайте на чертёж: ставятся копии. Esc — закончить.'); });
+    card.appendChild(cpb);
+  }
+  tzLinkBlock(card,it);
   card.appendChild(el('h2',null,'Фото ('+it.photos.length+')'));
   var grid=el('div','photos');
   it.photos.forEach(function(ph,i){
@@ -687,7 +834,10 @@ function renderCard(){
     cap.addEventListener('input',function(){ ph.cap=cap.value; it.upd=Date.now(); saveSoon('pins',it.id); });
     var x=el('button','btn small danger x','Убрать'); x.disabled=S.readOnly;
     x.addEventListener('click',function(){ it.photos.splice(i,1); touch(it); renderCard(); });
-    w.appendChild(im); w.appendChild(cap); w.appendChild(x); grid.appendChild(w);
+    var ed=el('button','btn small','Правка'); ed.disabled=S.readOnly; ed.title='Обрезка и стрелки';
+    ed.addEventListener('click',function(){ openPhotoEditor(it,i); });
+    var rr=el('div','row'); rr.style.gap='4px'; rr.style.justifyContent='space-between'; rr.appendChild(ed); rr.appendChild(x);
+    w.appendChild(im); w.appendChild(cap); w.appendChild(rr); grid.appendChild(w);
   });
   card.appendChild(grid);
   var addRow=el('div','row'); var inp=el('input'); inp.type='file'; inp.accept='image/*'; inp.multiple=true; inp.id='fPhoto'; inp.hidden=true;
@@ -695,7 +845,8 @@ function renderCard(){
   var canPhoto=!S.readOnly && (S.store==='local' || !!assets);
   if(!canPhoto){ ab.style.opacity='.45'; ab.style.pointerEvents='none'; }
   inp.addEventListener('change',function(){ addPhotos(it,inp.files); inp.value=''; });
-  addRow.appendChild(ab); addRow.appendChild(inp);
+  var cb2=el('button','btn small','Снять камерой'); cb2.disabled=!canPhoto; cb2.addEventListener('click',function(){ openCamera(it); });
+  addRow.appendChild(ab); addRow.appendChild(cb2); addRow.appendChild(inp);
   if(!canPhoto && !S.readOnly) addRow.appendChild(el('span','lbline','Фото добавляют редакторы страницы.'));
   card.appendChild(addRow);
   commentsBlock(card,it);
@@ -705,6 +856,9 @@ function renderCard(){
 function renderLineCard(card,l){
   card.appendChild(el('h2',null,'Линия'));
   var lb=el('input'); lb.type='text'; lb.placeholder='Что обозначает (например: трасса ВПВ)'; bindText(lb,l,'label',function(){renderLists();renderOverlay()}); card.appendChild(field('Подпись',lb));
+  var ks=el('select'); [['line','Линия'],['arrow','Стрелка'],['zone','Зона (контур)']].forEach(function(k){ var o=el('option',null,k[1]); o.value=k[0]; ks.appendChild(o); });
+  ks.value=l.kind||'line'; ks.disabled=S.readOnly; ks.addEventListener('change',function(){ l.kind=ks.value; touch(l); });
+  card.appendChild(field('Тип',ks));
   var sw=el('div','swatches'); sw.setAttribute('role','group'); sw.setAttribute('aria-label','Цвет линии');
   COLORS.forEach(function(c){ var b=el('button','sw'); b.style.background=c[0]; b.title=c[1]; b.setAttribute('aria-label',c[1]); b.setAttribute('aria-pressed',l.color===c[0]?'true':'false'); b.disabled=S.readOnly;
     b.addEventListener('click',function(){ l.color=c[0]; touch(l); renderCard(); }); sw.appendChild(b); });
@@ -726,7 +880,7 @@ function commentsBlock(card,it){
   var ta=el('textarea'); ta.rows=2; ta.placeholder='Новый комментарий'; ta.id='fComment'; ta.disabled=S.readOnly;
   var add=el('button','btn small','Добавить комментарий'); add.disabled=S.readOnly;
   add.addEventListener('click',function(){ var t=ta.value.trim(); if(!t) return; if(!it.comments) it.comments=[]; it.comments.push({id:uid('c'),t:t,ts:Date.now()}); touch(it); renderCard(); });
-  card.appendChild(ta); card.appendChild(add);
+  card.appendChild(ta); card.appendChild(assist(ta)); card.appendChild(add);
 }
 function confirmDelete(btn,fn){
   var armed=false, t=null, label=btn.textContent;
@@ -762,7 +916,11 @@ function select(id,centre){
   if(centre && it){
     var sc=$('scroll'), st=$('stage'), fx=null, fy=null;
     if(it.pts){ fx=it.pts[0][0]; fy=it.pts[0][1]; } else if(it.fx!=null){ fx=it.fx; fy=it.fy; }
-    if(fx!=null) sc.scrollTo({left:fx*st.offsetWidth-sc.clientWidth/2, top:fy*st.offsetHeight-sc.clientHeight/2, behavior:'smooth'});
+    if(fx!=null){
+      var sd=$('side'), cw=sc.clientWidth;
+      if(sd.classList.contains('open')&&getComputedStyle(sd).position==='absolute') cw-=sd.offsetWidth+20;
+      sc.scrollTo({left:fx*st.offsetWidth-cw/2, top:fy*st.offsetHeight-sc.clientHeight/2, behavior:'smooth'});
+    }
   }
 }
 var HINTS={
@@ -770,11 +928,16 @@ var HINTS={
   pin:'Нажмите на чертеже, чтобы поставить маркер.',
   line:'Нажимайте точки на чертеже. Двойной щелчок или кнопка «Готово» завершает линию, Esc отменяет.',
   sym:'Выберите знак выше и нажимайте на чертеже, чтобы расставить. Esc — закончить. Знак можно потом перетащить, подписать и добавить фото.',
+  text:'Нажмите на чертеже, чтобы поставить надпись. Текст вводится в карточке.',
+  stamp:'Нажимайте на чертёж: ставятся копии выбранного маркера. Esc — закончить.',
   free:'Ведите пальцем или мышью по чертежу, чтобы нарисовать линию. Esc отменяет.'
 };
-function setMode(m){
-  cancelDraft(); S.mode=m;
-  [['mSel','sel'],['mPin','pin'],['mLine','line'],['mFree','free'],['mSym','sym']].forEach(function(p){ $(p[0]).setAttribute('aria-pressed',S.mode===p[1]?'true':'false'); });
+function setMode(m,o){
+  cancelDraft(); S.mode=m; o=o||{}; S.pinPhoto=!!o.pinPhoto; S.lineKind=o.lineKind||'line';
+  var pr={mSel:m==='sel',mPin:m==='pin'&&!S.pinPhoto,mPinPh:m==='pin'&&S.pinPhoto,mLine:m==='line'&&S.lineKind==='line',mArrow:m==='line'&&S.lineKind==='arrow',mZone:m==='line'&&S.lineKind==='zone',mFree:m==='free',mText:m==='text',mSym:m==='sym',mDraw:m==='line'||m==='free'||m==='text'};
+  Object.keys(pr).forEach(function(k){ var e=$(k); if(e) e.setAttribute('aria-pressed',pr[k]?'true':'false'); });
+  $('drawMenu').hidden=true;
+  $('viewPlan').setAttribute('data-mode',m); renderCard();
   $('cap').className=(m==='sel')?'':'on'; $('symbar').hidden=(m!=='sym'); if(m==='sym') renderSymBar();
   $('stage').style.touchAction=(m==='sel')?'pan-x pan-y':'none';
   renderHint();
@@ -808,7 +971,8 @@ function drawDraft(extra){
 function finishLine(){
   if(!S.draft){ return; }
   var pts=S.draft.pts; cancelDraft();
-  if(pts.length>=2){ var l=newLine(pts); S.sel=l.id; setMode('sel'); renderAll(); setTimeout(function(){var t=document.querySelector('#card input[type=text]'); if(t) t.focus();},50); }
+  if(S.lineKind==='zone'&&pts.length<3){ toast('Для зоны нужно минимум 3 точки.'); renderHint(); return; }
+  if(pts.length>=2){ var l=newLine(pts); S.sel=l.id; feedback('place'); setMode('sel'); renderAll(); setTimeout(function(){var t=document.querySelector('#card input[type=text]'); if(t) t.focus();},50); }
   renderHint();
 }
 (function(){
@@ -817,11 +981,22 @@ function finishLine(){
     if(S.readOnly){ toast('Правки отключены: у вас режим просмотра.'); return; }
     var p=relPos(e);
     if(S.mode==='pin'){
-      var pin=newPin(p[0],p[1]); S.sel=pin.id; setMode('sel'); renderAll();
+      var pf=S.pinPhoto, pin=newPin(p[0],p[1]); S.sel=pin.id; feedback('place'); setMode('sel'); renderAll();
+      if(pf) openCamera(pin); else setTimeout(function(){var t=$('fTitle'); if(t) t.focus();},50);
+      return;
+    }
+    if(S.mode==='text'){
+      var tp=newPin(p[0],p[1]); tp.txt=true; tp.num=''; S.sel=tp.id; feedback('place'); setMode('sel'); renderAll();
       setTimeout(function(){var t=$('fTitle'); if(t) t.focus();},50); return;
     }
+    if(S.mode==='stamp'){
+      var src=S.pins[S.stampSrc]; if(!src){ setMode('sel'); return; }
+      var cp={id:uid('p'),num:(src.sym||src.txt)?'':nextNum(),title:src.title||'',desc:src.desc||'',consider:src.consider||'',facts:src.facts||'',basis:src.basis||'',unsure:false,sys:(src.sys||[]).slice(),planId:S.planId,fx:p[0],fy:p[1],photos:[],comments:[],upd:Date.now()};
+      if(src.sym) cp.sym=src.sym; if(src.txt) cp.txt=true;
+      S.pins[cp.id]=cp; saveSoon('pins',cp.id); feedback('place'); renderOverlay(); renderLists(); return;
+    }
     if(S.mode==='sym'){
-      var sy=newSym(S.symId,p[0],p[1]); S.sel=sy.id; renderOverlay(); renderLists(); renderCard(); return;
+      var sy=newSym(S.symId,p[0],p[1]); S.sel=sy.id; feedback('place'); renderOverlay(); renderLists(); renderCard(); return;
     }
     if(S.mode==='free'){ freeDown=true; S.draft={pts:[p]}; try{cap.setPointerCapture(e.pointerId)}catch(_){} drawDraft(); renderHint(); return; }
     if(S.mode==='line'){
@@ -850,25 +1025,40 @@ function finishLine(){
     sws.appendChild(b); });
   $('mSel').addEventListener('click',function(){setMode('sel')});
   $('mPin').addEventListener('click',function(){setMode('pin')});
+  $('mPinPh').addEventListener('click',function(){setMode('pin',{pinPhoto:true})});
   $('mLine').addEventListener('click',function(){setMode('line')});
   $('mFree').addEventListener('click',function(){setMode('free')});
+  $('mArrow').addEventListener('click',function(){setMode('line',{lineKind:'arrow'})});
+  $('mZone').addEventListener('click',function(){setMode('line',{lineKind:'zone'})});
+  $('mText').addEventListener('click',function(){setMode('text')});
+  $('mDraw').addEventListener('click',function(){
+    var m=$('drawMenu'); if(!m.hidden){ m.hidden=true; return; }
+    m.hidden=false;
+    var r=$('mDraw').getBoundingClientRect(), w=$('viewPlan').getBoundingClientRect();
+    m.style.left=(r.right-w.left+8)+'px'; m.style.top=Math.max(8,Math.min(r.top-w.top,w.height-m.offsetHeight-8))+'px';
+  });
+  $('mLock').addEventListener('click',function(){
+    S.locked=!S.locked; this.setAttribute('aria-pressed',S.locked?'true':'false');
+    toast(S.locked?'Маркеры закреплены: их можно выбирать, но не сдвинуть.':'Маркеры можно перетаскивать.');
+  });
   $('mSym').addEventListener('click',function(){setMode('sym')});
   $('zin').addEventListener('click',function(){setZoom(S.z*1.4)});
   $('zout').addEventListener('click',function(){setZoom(S.z/1.4)});
-  $('zfit').addEventListener('click',function(){setZoom(1)});
+  $('zfit').addEventListener('click',function(){ fitPlan(); });
   $('lblBtn').addEventListener('click',function(){ var on=this.getAttribute('aria-pressed')!=='true'; this.setAttribute('aria-pressed',on?'true':'false'); $('pins').parentNode.classList.toggle('labels-off',!on); });
   $('addNote').addEventListener('click',function(){
     if(S.readOnly) return;
-    var p=newPin(null,null); p.num='Н'+(Object.keys(S.pins).filter(function(k){return S.pins[k].fx==null}).length); S.sel=p.id; renderAll(); setTimeout(function(){var t=$('fTitle'); if(t) t.focus();},50);
+    var p=newPin(null,null); p.num='Н'+(Object.keys(S.pins).filter(function(k){return S.pins[k].fx==null}).length); S.sel=p.id; closeDrawer(); renderAll(); setTimeout(function(){var t=$('fTitle'); if(t) t.focus();},50);
   });
   $('vPlan').addEventListener('click',function(){ setView('plan'); });
   $('vTz').addEventListener('click',function(){ setView('tz'); });
+  $('vWalk').addEventListener('click',function(){ setView('walk'); });
 })();
 function setZoom(v,mx,my){
   var sc=$('scroll'), st=$('stage'), r=sc.getBoundingClientRect(), old=st.offsetWidth, oh=st.offsetHeight;
   if(mx==null){ mx=r.left+r.width/2; my=r.top+r.height/2; }
   var fx=(sc.scrollLeft+mx-r.left)/old, fy=(sc.scrollTop+my-r.top)/oh;
-  S.z=Math.max(1,Math.min(6,v)); st.style.width=(S.z*100)+'%';
+  S.fit=false; S.z=Math.max(.25,Math.min(6,v)); st.style.width=(S.z*100)+'%';
   sc.scrollLeft=fx*st.offsetWidth-(mx-r.left); sc.scrollTop=fy*st.offsetHeight-(my-r.top);
 }
 (function(){
@@ -890,10 +1080,23 @@ window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); d
 $('btnInstall').addEventListener('click',function(){ if(!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(function(){ deferredInstall=null; $('btnInstall').hidden=true; }); });
 window.addEventListener('appinstalled',function(){ $('btnInstall').hidden=true; });
 try{ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')) navigator.serviceWorker.register('sw.js'); }catch(e){}
+function openDrawer(){ $('drawer').hidden=false; }
+function closeDrawer(){ $('drawer').hidden=true; }
+$('btnList').addEventListener('click',openDrawer);
+$('drawClose').addEventListener('click',closeDrawer);
+$('dback').addEventListener('click',closeDrawer);
+$('sideClose').addEventListener('click',function(){ S.sel=null; $('side').classList.remove('tall'); renderOverlay(); renderLists(); renderCard(); });
+$('sideTall').addEventListener('click',function(){ var t=$('side').classList.toggle('tall'); this.textContent=t?'Свернуть':'Развернуть'; setTimeout(function(){ if(S.fit) fitPlan(); },0); });
+var rzT=null;
+function onResize(){ clearTimeout(rzT); rzT=setTimeout(function(){ if(S.fit&&S.view==='plan') fitPlan(); },120); }
+window.addEventListener('resize',onResize); window.addEventListener('orientationchange',onResize);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!$('drawer').hidden) closeDrawer(); });
 function setView(v){
   S.view=v;
-  $('vPlan').setAttribute('aria-pressed',v==='plan'?'true':'false'); $('vTz').setAttribute('aria-pressed',v==='tz'?'true':'false');
-  $('viewPlan').hidden=v!=='plan'; $('viewTz').hidden=v!=='tz';
+  $('vPlan').setAttribute('aria-pressed',v==='plan'?'true':'false'); $('vTz').setAttribute('aria-pressed',v==='tz'?'true':'false'); $('vWalk').setAttribute('aria-pressed',v==='walk'?'true':'false');
+  $('viewPlan').hidden=v!=='plan'; $('viewTz').hidden=v!=='tz'; $('viewWalk').hidden=v!=='walk';
+  if(v==='walk') renderWalk(); document.body.classList.toggle('planmode',v==='plan');
+  if(v==='plan') setTimeout(function(){ if(S.fit) fitPlan(); },0);
   if(v==='tz') renderTz();
 }
 
@@ -933,7 +1136,7 @@ $('imJson').addEventListener('change',function(){
       });
       Object.keys(d.pins||{}).forEach(function(k){ var p=d.pins[k]; p.id=uid('p'); p.planId=pmap[p.planId]||S.planId; p.photos=(p.photos||[]).filter(function(x){return x.k!=='d'||S.store==='local'}); S.pins[p.id]=p; saveSoon('pins',p.id); n++; });
       Object.keys(d.lines||{}).forEach(function(k){ var l=d.lines[k]; l.id=uid('l'); l.planId=pmap[l.planId]||S.planId; S.lines[l.id]=l; saveSoon('lines',l.id); n++; });
-      Object.keys(d.tzs||{}).forEach(function(k){ var t=d.tzs[k]; if(!t||!t.tpl) return; t.id=uid('tz'); S.tzm[t.id]=t; saveSoon('tz',t.id); n++; });
+      Object.keys(d.tzs||{}).forEach(function(k){ var t=d.tzs[k]; if(k==='_cfg'){ mergeCfg(t); return; } if(!t||!t.tpl) return; t.id=uid('tz'); S.tzm[t.id]=t; saveSoon('tz',t.id); n++; });
       normalize(); loadPlanImage(); renderPlanBar(); renderAll(); if(S.view==='tz') renderTz(); updateMeta(); toast('Добавлено из копии: '+n);
     }catch(e){ toast('Файл копии не читается.'); }
   };
@@ -948,12 +1151,24 @@ function renderPlanCanvas(plan){
       Object.keys(S.lines).forEach(function(k){
         var l=S.lines[k]; if(l.planId!==plan.id||!l.pts||l.pts.length<2) return;
         g.strokeStyle=l.color||'#FF7800'; g.lineWidth=W/300; g.lineCap='round'; g.lineJoin='round'; g.beginPath();
-        l.pts.forEach(function(p,i){ if(i) g.lineTo(p[0]*W,p[1]*H); else g.moveTo(p[0]*W,p[1]*H); }); g.stroke();
+        l.pts.forEach(function(p,i){ if(i) g.lineTo(p[0]*W,p[1]*H); else g.moveTo(p[0]*W,p[1]*H); });
+        if(l.kind==='zone'){ g.closePath(); g.save(); g.globalAlpha=.16; g.fillStyle=l.color||'#FF7800'; g.fill(); g.restore(); }
+        g.stroke();
+        if(l.kind==='arrow'){
+          var qa=l.pts[l.pts.length-2], qb=l.pts[l.pts.length-1], qx=qa[0]*W, qy=qa[1]*H, wx=qb[0]*W, wy=qb[1]*H, ang=Math.atan2(wy-qy,wx-qx), HL=W/70;
+          g.beginPath(); g.moveTo(wx,wy); g.lineTo(wx-HL*Math.cos(ang-.45),wy-HL*Math.sin(ang-.45)); g.lineTo(wx-HL*Math.cos(ang+.45),wy-HL*Math.sin(ang+.45)); g.closePath(); g.fillStyle=l.color||'#FF7800'; g.fill();
+        }
         if(l.label){ var m=l.pts[Math.floor(l.pts.length/2)]; g.font='600 '+(W/110)+'px sans-serif'; g.lineWidth=W/400; g.strokeStyle='#fff'; g.strokeText(l.label,m[0]*W+8,m[1]*H-10); g.fillStyle=l.color||'#FF7800'; g.fillText(l.label,m[0]*W+8,m[1]*H-10); }
       });
       var r=W/60;
       Object.keys(S.pins).forEach(function(k){
         var p=S.pins[k]; if(p.fx==null||p.planId!==plan.id) return; var x=p.fx*W,y=p.fy*H;
+        if(p.txt){
+          var tt=p.title||'Текст'; g.font='600 '+(W/95)+'px sans-serif'; g.textAlign='left'; g.textBaseline='middle';
+          var tw3=g.measureText(tt).width, px=W/180, ph3=W/60;
+          g.fillStyle='#fff'; g.fillRect(x-tw3/2-px,y-ph3/2,tw3+2*px,ph3); g.lineWidth=W/600; g.strokeStyle='#1F3864'; g.strokeRect(x-tw3/2-px,y-ph3/2,tw3+2*px,ph3);
+          g.fillStyle='#16233B'; g.fillText(tt,x-tw3/2,y+1); return;
+        }
         if(p.sym){
           var si=symInfo(p.sym), hs=r*1.05, rr=hs*.35;
           g.beginPath(); g.moveTo(x-hs+rr,y-hs); g.arcTo(x+hs,y-hs,x+hs,y+hs,rr); g.arcTo(x+hs,y+hs,x-hs,y+hs,rr); g.arcTo(x-hs,y+hs,x-hs,y-hs,rr); g.arcTo(x-hs,y-hs,x+hs,y-hs,rr); g.closePath();
@@ -1164,7 +1379,9 @@ function pinsForDoc(d){
 function goPin(id){ setView('plan'); select(id,true); window.scrollTo({top:0,behavior:'smooth'}); }
 function answerText(d,q){
   var s=(d.sel||{})[q.id], a=(d.a||{})[q.id];
-  return [s,a].filter(function(x){return x&&String(x).trim()}).join('. ');
+  var r=[s,a].filter(function(x){return x&&String(x).trim()}).join('. ');
+  if(!r && /экспликаци/i.test(q.q) && cfg().rooms.length) return 'См. приложение «Экспликация помещений»: '+cfg().rooms.length+' помещ.';
+  return r;
 }
 function progress(d,qs){ var n=0; qs.forEach(function(q){ if(answerText(d,q)) n++; }); return n; }
 
@@ -1220,7 +1437,7 @@ function renderTz(){
 }
 function questionNode(d,q){
   var w=el('div','f'); w.style.cssText='border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--panel);flex:none';
-  w.appendChild(el('span',null,'<b style="color:var(--ink);font-size:14px">'+q.n+'. '+esc(q.q)+'</b>'));
+  w.appendChild(el('span',null,'<b style="color:var(--ink);font-size:14px">'+q.n+'. '+esc(q.q)+'</b>'+(/Обязательн/i.test(q.h||'')?' <span class="req">Обязательный пункт</span>':'')));
   if(q.h) w.appendChild(el('p','hint',esc(q.h)));
   if(q.o){
     var r=el('div','chips'); r.style.margin='4px 0';
@@ -1233,7 +1450,7 @@ function questionNode(d,q){
   }
   var ta=el('textarea'); ta.rows=2; ta.value=(d.a||{})[q.id]||''; ta.placeholder='Ответ / комментарий'; ta.disabled=S.readOnly;
   ta.addEventListener('input',function(){ d.a=d.a||{}; d.a[q.id]=ta.value; tzTouch(d); });
-  w.appendChild(ta);
+  w.appendChild(ta); w.appendChild(assist(ta));
   var pins=pinsForDoc(d);
   if(pins.length && !S.readOnly){
     var ps=el('select'); ps.style.marginTop='6px'; ps.setAttribute('aria-label','Вставить ссылку на маркер');
@@ -1295,8 +1512,12 @@ function buildDoc2(d,secs,opt){
   });
   h+='</table>';
   h+='<table class="sign"><tr><td>Исполнитель: '+esc(d.exec||'______________________')+' / </td><td>Заказчик: '+esc(d.cust||'______________________')+' / </td></tr></table>';
+  var ax=appxTables();
+  ax.forEach(function(t,i){
+    h+='<h2>Приложение '+(i+1)+'. '+esc(t.title)+'</h2><table><tr>'+t.head.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr>'+t.rows.map(function(r){ return '<tr>'+r.map(function(c){ return '<td>'+ml(c)+'</td>'; }).join('')+'</tr>'; }).join('')+'</table>';
+  });
   var pins=pinsForDoc(d);
-  h+='<h2>Приложение 1. Данные обследования ('+esc(docSystems(d).map(sysName).join(', '))+')</h2>'+pinTable(pins,opt);
+  h+='<h2>Приложение '+(ax.length+1)+'. Данные обследования ('+esc(docSystems(d).map(sysName).join(', '))+')</h2>'+pinTable(pins,opt);
   var tasks=[];
   if(opt.plans){
     plansSorted().forEach(function(p){
@@ -1307,7 +1528,7 @@ function buildDoc2(d,secs,opt){
   return Promise.all(tasks.map(function(p){ return renderPlanCanvas(p).then(function(c){ return {p:p,u:c.toDataURL('image/jpeg',.85)}; }).catch(function(){return null}); })).then(function(figs){
     figs=figs.filter(Boolean);
     if(figs.length){
-      h+='<h2>Приложение 2. Чертежи с отметками обследования</h2>';
+      h+='<h2>Приложение '+(ax.length+2)+'. Чертежи с отметками обследования</h2>';
       figs.forEach(function(f){ h+='<p><b>'+esc(f.p.name||'Чертёж')+'</b></p><p><img class="fig" src="'+f.u+'" alt=""></p>'; });
     }
     return h;
@@ -1441,7 +1662,18 @@ async function buildDocx(d,secs,opt){
   var W=[800,3250,3000,2000,1557];
   function tc(w,inner,shade){ return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(shade?'<w:shd w:val="clear" w:color="auto" w:fill="DCE6F1"/>':'')+'</w:tcPr>'+inner+'</w:tc>'; }
   tail.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
-  tail.push(wPara('Приложение 1. Данные обследования ('+docSystems(d).map(sysName).join(', ')+')',{b:1,sz:22,after:120,keep:1}));
+  var ax=appxTables();
+  function gridTable(Wd,head,rows){
+    var t='<w:tbl><w:tblPr><w:tblW w:w="10607" w:type="dxa"/><w:tblBorders>'+['top','left','bottom','right','insideH','insideV'].map(function(s){ return '<w:'+s+' w:val="single" w:sz="4" w:space="0" w:color="000000"/>'; }).join('')+'</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="50" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="50" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>'+Wd.map(function(w){return '<w:gridCol w:w="'+w+'"/>'}).join('')+'</w:tblGrid>';
+    t+='<w:tr><w:trPr><w:tblHeader/></w:trPr>'+head.map(function(h,i){ return tc(Wd[i],wPara(h,{b:1}),1); }).join('')+'</w:tr>';
+    rows.forEach(function(r){ t+='<w:tr><w:trPr><w:cantSplit/></w:trPr>'+r.map(function(c,i){ return tc(Wd[i],wParas(c)); }).join('')+'</w:tr>'; });
+    return t+'</w:tbl>';
+  }
+  ax.forEach(function(t,i){
+    tail.push(wPara('Приложение '+(i+1)+'. '+t.title,{b:1,sz:22,after:120,keep:1}));
+    tail.push(gridTable(t.w,t.head,t.rows)); tail.push('<w:p/>');
+  });
+  tail.push(wPara('Приложение '+(ax.length+1)+'. Данные обследования ('+docSystems(d).map(sysName).join(', ')+')',{b:1,sz:22,after:120,keep:1}));
   if(!pins.length) tail.push(wPara('Маркеров обследования, отмеченных этими системами, нет.'));
   else {
     var t='<w:tbl><w:tblPr><w:tblW w:w="10607" w:type="dxa"/><w:tblBorders>'+['top','left','bottom','right','insideH','insideV'].map(function(s){ return '<w:'+s+' w:val="single" w:sz="4" w:space="0" w:color="000000"/>'; }).join('')+'</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="50" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="50" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>'+W.map(function(w){return '<w:gridCol w:w="'+w+'"/>'}).join('')+'</w:tblGrid>';
@@ -1467,7 +1699,7 @@ async function buildDocx(d,secs,opt){
       var cv=await renderPlanCanvas(plans[qi]), im=await addImage(cv.toDataURL('image/jpeg',.85),6700000,8300000);
       if(!im) continue;
       tail.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
-      if(first){ tail.push(wPara('Приложение 2. Чертежи с отметками обследования',{b:1,sz:22,after:120,keep:1})); first=false; }
+      if(first){ tail.push(wPara('Приложение '+(ax.length+2)+'. Чертежи с отметками обследования',{b:1,sz:22,after:120,keep:1})); first=false; }
       tail.push(wPara(plans[qi].name||'Чертёж',{b:1,after:80,keep:1}));
       tail.push('<w:p>'+im+'</w:p>');
     }
@@ -1523,6 +1755,390 @@ function renderDocTab(host,d,secs){
   refresh();
 }
 
+/* ======= v4: фразы, диктовка, камера, правка фото, ТЗ в карточке, обход ======= */
+var DEF_PHRASES=['Потолок бетон, балки','Потолок подвесной (Армстронг)','Высота потолка … м','Нужно уточнить у заказчика','Сохраняется','Демонтируется','Требуется замена','Нет доступа','См. фото','Отключение вентиляции через шкаф','Рядом есть питание 220 В','Кабель в кабель-канале','Кабель в гофре'];
+var DEF_CHECK=[['elec','Электрощитовая / ГРЩ'],['pump','Насосная станция'],['vin','Ввод водопровода, узел учёта'],['vent','Шкафы управления вентиляцией'],['cond','Кондиционеры, тепловые завесы, фанкойлы'],['post','Пожарный пост / место для ПКП'],['smoke','Дымоудаление, огнезадерживающие клапаны'],['lift','Лифты, эскалаторы'],['skud','СКУД (замки, турникеты, ворота)'],['spcold','Существующая СПС / СОУЭ'],['aupold','Существующие АУП / ВПВ'],['basement','Подвал'],['attic','Чердак'],['noise','Помещения с шумом выше 85 дБА'],['wet','Помещения с мокрыми процессами'],['hot','Помещения с повышенной температурой (котельная, кухня)']];
+var CHK_LBL={ok:'Осмотрено',no:'Не осмотрено',na:'Нет на объекте'};
+function cfg(){
+  var c=S.tzm._cfg;
+  if(!c) c=S.tzm._cfg={id:'_cfg',upd:Date.now()};
+  if(!c.phrases) c.phrases=DEF_PHRASES.slice();
+  if(!c.check) c.check={};
+  if(!c.rooms) c.rooms=[];
+  return c;
+}
+function cfgSave(){ cfg().upd=Date.now(); saveSoon('tz','_cfg'); }
+function checkItems(){ var c=cfg(); return (c.items&&c.items.length)?c.items:DEF_CHECK.map(function(x){return {id:x[0],name:x[1]}}); }
+function mergeCfg(t){
+  if(!t) return; var c=cfg();
+  if(t.phrases&&t.phrases.length) c.phrases=t.phrases;
+  if(t.items&&t.items.length) c.items=t.items;
+  Object.keys(t.check||{}).forEach(function(k){ c.check[k]=t.check[k]; });
+  (t.rooms||[]).forEach(function(r){ c.rooms.push(r); });
+  cfgSave();
+}
+function prefGet(k,def){ try{ var v=localStorage.getItem('obs_pref_'+k); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
+function prefSet(k,v){ try{ localStorage.setItem('obs_pref_'+k,JSON.stringify(v)); }catch(e){} }
+
+/* ---- вибрация / звук ---- */
+var actx=null;
+function feedback(kind){
+  try{
+    if(prefGet('fb',true)===false) return;
+    if(navigator.vibrate) navigator.vibrate(kind==='save'?[20,40,20]:25);
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(AC){ actx=actx||new AC(); var o=actx.createOscillator(), g=actx.createGain(); o.frequency.value=kind==='save'?880:620; g.gain.value=.05; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+.07); }
+  }catch(e){}
+}
+
+/* ---- диктовка и быстрые фразы ---- */
+function insertText(ta,t){
+  if(!t) return; var v=ta.value;
+  var sep=v&&!/\s$/.test(v)?(/[.,;:]$/.test(v)?' ':', '):'';
+  ta.value=v+sep+t; ta.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function assist(ta){
+  var wrap=el('div','assist'), row=el('div','row'); row.style.gap='6px'; row.style.alignItems='center';
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR&&!S.readOnly){
+    var mic=el('button','btn small','Диктовка'); mic.type='button';
+    var rec=null, on=false;
+    mic.addEventListener('click',function(){
+      if(on&&rec){ rec.stop(); return; }
+      rec=new SR(); rec.lang='ru-RU'; rec.interimResults=false; rec.continuous=false;
+      rec.onresult=function(e){ var t=''; for(var i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript; insertText(ta,t.trim()); };
+      rec.onend=function(){ on=false; mic.textContent='Диктовка'; mic.setAttribute('aria-pressed','false'); };
+      rec.onerror=function(e){ toast(e&&e.error==='not-allowed'?'Нет доступа к микрофону.':'Диктовка не удалась. Можно диктовать кнопкой микрофона на клавиатуре.'); };
+      try{ rec.start(); on=true; mic.textContent='Слушаю… (стоп)'; mic.setAttribute('aria-pressed','true'); }catch(_){ on=false; }
+    });
+    row.appendChild(mic);
+  }
+  var fb=el('button','btn small','Фразы ▾'); fb.type='button'; fb.disabled=S.readOnly;
+  var box=el('div','chips'); box.hidden=true; box.style.marginTop='6px';
+  cfg().phrases.forEach(function(ph){
+    var c=el('button','chip',esc(ph)); c.type='button'; c.addEventListener('click',function(){ insertText(ta,ph); });
+    box.appendChild(c);
+  });
+  fb.addEventListener('click',function(){ box.hidden=!box.hidden; fb.textContent=box.hidden?'Фразы ▾':'Фразы ▴'; });
+  row.appendChild(fb); wrap.appendChild(row); wrap.appendChild(box);
+  return wrap;
+}
+
+/* ---- камера (серия снимков к одному маркеру) ---- */
+var camStream=null, camItem=null, camN=0;
+function openCamera(item){
+  camItem=item; camN=0;
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){ return camFallback(item); }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920}},audio:false}).then(function(st){
+    camStream=st; var v=$('camVideo'); v.srcObject=st; $('cam').hidden=false; $('camCount').textContent='Снято: 0'; try{ v.play(); }catch(_){}
+  }).catch(function(){ camFallback(item); });
+}
+function camFallback(item){
+  toast('Встроенная камера недоступна: откроется системная.');
+  var i=$('camInput'); i.onchange=function(){ if(i.files.length) addPhotos(item,i.files); i.value=''; }; i.click();
+}
+function closeCamera(){
+  if(camStream){ camStream.getTracks().forEach(function(t){ t.stop(); }); camStream=null; }
+  $('camVideo').srcObject=null; $('cam').hidden=true;
+  if(camItem){ renderCard(); renderOverlay(); }
+}
+$('camShot').addEventListener('click',function(){
+  var v=$('camVideo'); if(!v.videoWidth||!camItem) return;
+  var c=document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0);
+  feedback('place');
+  c.toBlob(function(b){ if(!b) return; camN++; $('camCount').textContent='Снято: '+camN; addPhotos(camItem,[b]); },'image/jpeg',.88);
+});
+$('camDone').addEventListener('click',closeCamera);
+
+/* ---- правка фото: обрезка и стрелки ---- */
+var ped={it:null,i:0,base:null,arrows:[],hist:[],tool:'arrow',drag:null,crop:null};
+function pedClone(c){ var n=document.createElement('canvas'); n.width=c.width; n.height=c.height; n.getContext('2d').drawImage(c,0,0); return n; }
+function pedArrows(g,list,W){
+  var lw=Math.max(4,W/150);
+  list.forEach(function(a){
+    var an=Math.atan2(a.y2-a.y1,a.x2-a.x1), L=lw*5;
+    g.strokeStyle='#E11D2E'; g.fillStyle='#E11D2E'; g.lineWidth=lw; g.lineCap='round';
+    g.beginPath(); g.moveTo(a.x1,a.y1); g.lineTo(a.x2-Math.cos(an)*L*.6,a.y2-Math.sin(an)*L*.6); g.stroke();
+    g.beginPath(); g.moveTo(a.x2,a.y2); g.lineTo(a.x2-L*Math.cos(an-.45),a.y2-L*Math.sin(an-.45)); g.lineTo(a.x2-L*Math.cos(an+.45),a.y2-L*Math.sin(an+.45)); g.closePath(); g.fill();
+  });
+}
+function pedDraw(){
+  var cv=$('pedCv'), b=ped.base; if(!b) return;
+  if(cv.width!==b.width||cv.height!==b.height){ cv.width=b.width; cv.height=b.height; }
+  var g=cv.getContext('2d'); g.drawImage(b,0,0);
+  pedArrows(g,ped.arrows,b.width);
+  if(ped.drag&&ped.tool==='arrow') pedArrows(g,[ped.drag],b.width);
+  var r=ped.crop;
+  if(r&&r.w>2&&r.h>2){
+    g.save(); g.fillStyle='rgba(0,0,0,.55)'; g.beginPath(); g.rect(0,0,b.width,b.height); g.rect(r.x,r.y,r.w,r.h); g.fill('evenodd'); g.restore();
+    g.strokeStyle='#fff'; g.lineWidth=Math.max(2,b.width/400); g.setLineDash([10,6]); g.strokeRect(r.x,r.y,r.w,r.h); g.setLineDash([]);
+  }
+}
+function pedTool(t){
+  ped.tool=t; ped.crop=null; ped.drag=null;
+  $('pedArrow').setAttribute('aria-pressed',t==='arrow'?'true':'false'); $('pedCrop').setAttribute('aria-pressed',t==='crop'?'true':'false');
+  $('pedApply').hidden=t!=='crop'; pedDraw();
+}
+function pedSnap(){ ped.hist.push({base:pedClone(ped.base),arrows:ped.arrows.slice()}); if(ped.hist.length>12) ped.hist.shift(); }
+function openPhotoEditor(it,i){
+  var im=new Image();
+  im.onload=function(){
+    var s=Math.min(1,2000/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement('canvas');
+    c.width=Math.round(im.naturalWidth*s); c.height=Math.round(im.naturalHeight*s); c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    ped={it:it,i:i,base:c,arrows:[],hist:[],tool:'arrow',drag:null,crop:null};
+    $('ped').hidden=false; pedTool('arrow');
+  };
+  im.onerror=function(){ toast('Не удалось открыть фото.'); };
+  im.src=photoSrc(it.photos[i]);
+}
+(function(){
+  var cv=$('pedCv'), down=false;
+  function pos(e){ var r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]; }
+  cv.addEventListener('pointerdown',function(e){
+    if(!ped.base) return; down=true; try{cv.setPointerCapture(e.pointerId);}catch(_){}
+    var p=pos(e);
+    if(ped.tool==='arrow') ped.drag={x1:p[0],y1:p[1],x2:p[0],y2:p[1]};
+    else ped.crop={x:p[0],y:p[1],w:0,h:0,ox:p[0],oy:p[1]};
+  });
+  cv.addEventListener('pointermove',function(e){
+    if(!down) return; var p=pos(e);
+    if(ped.tool==='arrow'&&ped.drag){ ped.drag.x2=p[0]; ped.drag.y2=p[1]; }
+    else if(ped.crop){ var c=ped.crop; c.x=Math.max(0,Math.min(c.ox,p[0])); c.y=Math.max(0,Math.min(c.oy,p[1])); c.w=Math.min(cv.width,Math.max(c.ox,p[0]))-c.x; c.h=Math.min(cv.height,Math.max(c.oy,p[1]))-c.y; }
+    pedDraw();
+  });
+  function up(){
+    if(!down) return; down=false;
+    if(ped.tool==='arrow'&&ped.drag){ var d=ped.drag; ped.drag=null; if(Math.hypot(d.x2-d.x1,d.y2-d.y1)>12){ pedSnap(); ped.arrows.push(d); } }
+    pedDraw();
+  }
+  cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+  $('pedArrow').addEventListener('click',function(){ pedTool('arrow'); });
+  $('pedCrop').addEventListener('click',function(){ pedTool('crop'); });
+  $('pedApply').addEventListener('click',function(){
+    var r=ped.crop; if(!r||r.w<10||r.h<10){ toast('Выделите область обрезки на фото.'); return; }
+    pedSnap();
+    var f=pedClone(ped.base); pedArrows(f.getContext('2d'),ped.arrows,f.width);
+    var n=document.createElement('canvas'); n.width=Math.round(r.w); n.height=Math.round(r.h);
+    n.getContext('2d').drawImage(f,r.x,r.y,r.w,r.h,0,0,n.width,n.height);
+    ped.base=n; ped.arrows=[]; ped.crop=null; pedDraw();
+  });
+  $('pedUndo').addEventListener('click',function(){
+    var h=ped.hist.pop(); if(h){ ped.base=h.base; ped.arrows=h.arrows; ped.crop=null; pedDraw(); } else if(ped.arrows.length){ ped.arrows.pop(); pedDraw(); }
+  });
+  $('pedClose').addEventListener('click',function(){ $('ped').hidden=true; ped.base=null; });
+  $('pedSave').addEventListener('click',function(){
+    if(!ped.base||!ped.it) return;
+    var f=pedClone(ped.base); pedArrows(f.getContext('2d'),ped.arrows,f.width);
+    var it=ped.it, ph=it.photos[ped.i]; if(!ph) return;
+    f.toBlob(function(b){
+      if(!b){ toast('Не удалось сохранить.'); return; }
+      resizeBlob(b,1600,.84).then(function(rb){
+        if(S.store==='db'&&assets) return assets.upload(rb,{type:'image/jpeg'}).then(function(r){ ph.k='a'; ph.v=r.id; });
+        return blobToDataUrl(rb).then(function(u){ ph.k='d'; ph.v=u; });
+      }).then(function(){ touch(it); renderCard(); $('ped').hidden=true; ped.base=null; feedback('save'); toast('Фото сохранено'); })
+      .catch(function(){ toast('Не удалось сохранить фото.'); });
+    },'image/jpeg',.9);
+  });
+})();
+
+/* ---- вопросы анкеты в карточке маркера ---- */
+var KW={ventoff:['вентиляц'],vcab:['вентиляц','шкаф'],cond:['кондиц','вентиляц'],p220:['щит','электроснаб','распредел'],shield:['щит','электроснаб','распредел'],post:['пожарного поста','пожарной автоматики'],pump:['насос'],vpv:['впв','водопровод'],aup:['ауп','пожаротуш'],siren:['оповещ','соуэ'],smoke:['дымоудал'],lift:['лифт'],skud:['скуд'],node1:['прибор']};
+function allQs(d){ var out=[]; tplSections(d.tpl).forEach(function(s){ s.qs.forEach(function(q){ out.push({q:q,sec:s.title}); }); }); return out; }
+function suggestQs(d,it){
+  var words=(KW[it.sym]||[]).slice();
+  var txt=((it.title||'')+' '+(it.desc||'')).toLowerCase();
+  (txt.match(/[а-яa-z0-9]{5,}/g)||[]).slice(0,10).forEach(function(w){ words.push(w.slice(0,5)); });
+  if(!words.length) return [];
+  var res=[];
+  allQs(d).forEach(function(o){
+    var t=(o.q.q+' '+(o.q.h||'')).toLowerCase(), sc=0;
+    words.forEach(function(w){ if(t.indexOf(w)>=0) sc++; });
+    if(sc>0) res.push({q:o.q,sc:sc});
+  });
+  res.sort(function(a,b){ return b.sc-a.sc; });
+  return res.slice(0,4).map(function(x){ return x.q; });
+}
+function linkedNode(d,q,onRemove){
+  var w=el('div','srv'); w.style.gap='6px';
+  var h=el('div','h'); h.appendChild(el('span',null,'<b>'+q.n+'.</b> '+esc(q.q)));
+  var rm=el('button','btn small','Убрать'); rm.addEventListener('click',onRemove); h.appendChild(rm); w.appendChild(h);
+  if(q.h) w.appendChild(el('p','hint',esc(q.h)));
+  if(q.o){
+    var r=el('div','chips');
+    q.o.forEach(function(o){ var b=el('button','chip',esc(o)); b.setAttribute('aria-pressed',(d.sel||{})[q.id]===o?'true':'false'); b.disabled=S.readOnly;
+      b.addEventListener('click',function(){ d.sel=d.sel||{}; d.sel[q.id]=(d.sel[q.id]===o)?'':o; tzTouch(d); Array.prototype.forEach.call(r.children,function(x){ x.setAttribute('aria-pressed',x===b&&d.sel[q.id]?'true':'false'); }); });
+      r.appendChild(b); });
+    w.appendChild(r);
+  }
+  var ta=el('textarea'); ta.rows=2; ta.value=(d.a||{})[q.id]||''; ta.placeholder='Ответ / комментарий'; ta.disabled=S.readOnly;
+  ta.addEventListener('input',function(){ d.a=d.a||{}; d.a[q.id]=ta.value; tzTouch(d); });
+  w.appendChild(ta); w.appendChild(assist(ta));
+  return w;
+}
+function tzLinkBlock(card,it){
+  card.appendChild(el('h2',null,'Вопросы ТЗ по этому маркеру'));
+  var docs=tzDocs(), d=curDoc();
+  if(!d){ card.appendChild(el('p','hint','Создайте ТЗ на вкладке «ТЗ»: вопросы анкеты появятся здесь, и ответ можно вписать на месте.')); return; }
+  if(docs.length>1){
+    var ds=el('select'); docs.forEach(function(x){ var o=el('option',null,esc((x.name||'Без названия')+' · '+TPL[x.tpl].short)); o.value=x.id; ds.appendChild(o); });
+    ds.value=d.id; ds.addEventListener('change',function(){ S.tzDoc=ds.value; renderCard(); }); card.appendChild(field('ТЗ',ds));
+  }
+  it.tq=it.tq||[];
+  var mine=it.tq.filter(function(x){ return x.d===d.id; }), byId={};
+  allQs(d).forEach(function(o){ byId[o.q.id]=o.q; });
+  mine.forEach(function(x){
+    var q=byId[x.q]; if(!q) return;
+    card.appendChild(linkedNode(d,q,function(){ it.tq=it.tq.filter(function(y){ return !(y.d===d.id&&y.q===q.id); }); touch(it); renderCard(); }));
+  });
+  var sug=suggestQs(d,it).filter(function(q){ return !mine.some(function(x){ return x.q===q.id; }); });
+  if(sug.length&&!S.readOnly){
+    card.appendChild(el('p','hint','Подходящие вопросы:'));
+    var r=el('div','chips');
+    sug.forEach(function(q){
+      var b=el('button','chip','<span class="t" style="max-width:320px;white-space:normal">＋ '+esc(q.q)+'</span>');
+      b.addEventListener('click',function(){ it.tq.push({d:d.id,q:q.id}); touch(it); renderCard(); }); r.appendChild(b);
+    });
+    card.appendChild(r);
+  }
+  if(!S.readOnly){
+    var pk=el('select'); var o0=el('option',null,'＋ Другой вопрос из анкеты…'); o0.value=''; pk.appendChild(o0);
+    tplSections(d.tpl).forEach(function(s){
+      var g=el('optgroup'); g.label=s.title;
+      s.qs.forEach(function(q){ var o=el('option',null,esc(q.n+'. '+(q.q.length>70?q.q.slice(0,70)+'…':q.q))); o.value=q.id; g.appendChild(o); });
+      pk.appendChild(g);
+    });
+    pk.addEventListener('change',function(){ if(!pk.value) return; if(!mine.some(function(x){ return x.q===pk.value; })){ it.tq.push({d:d.id,q:pk.value}); touch(it); } renderCard(); });
+    card.appendChild(pk);
+  }
+}
+
+/* ---- настройки в панели ---- */
+function renderPrefs(){
+  var h=$('prefsBox'); if(!h) return; h.innerHTML='';
+  h.appendChild(el('h2',null,'Быстрые фразы'));
+  h.appendChild(el('p','hint','По одной фразе в строке. Они появляются под полями «Фразы ▾» и вставляются одним нажатием.'));
+  var ta=el('textarea'); ta.rows=7; ta.value=cfg().phrases.join('\n'); ta.disabled=S.readOnly;
+  ta.addEventListener('input',function(){ cfg().phrases=ta.value.split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean); cfgSave(); });
+  h.appendChild(ta);
+  var rs=el('button','btn small','Вернуть стандартные'); rs.disabled=S.readOnly;
+  rs.addEventListener('click',function(){ cfg().phrases=DEF_PHRASES.slice(); cfgSave(); ta.value=cfg().phrases.join('\n'); });
+  var l=el('label','chk'), c=el('input'); c.type='checkbox'; c.checked=prefGet('fb',true)!==false;
+  c.addEventListener('change',function(){ prefSet('fb',c.checked); if(c.checked) feedback('place'); });
+  l.appendChild(c); l.appendChild(document.createTextNode('Вибрация и звук при постановке маркера, снимке, сохранении'));
+  var row=el('div','row'); row.appendChild(rs); h.appendChild(row); h.appendChild(l);
+}
+
+/* ---- приложения к ТЗ из «Обхода» ---- */
+function appxTables(){
+  var out=[], c=cfg();
+  if(c.rooms.length) out.push({title:'Экспликация помещений',head:['№','Назначение','Площадь, м²','Высота, м','Тип потолка','Примечание'],w:[700,3000,1200,1100,2200,2407],rows:c.rooms.map(function(r){ return [r.n||'',r.purpose||'',r.area||'',r.height||'',r.ceiling||'',r.note||'']; })});
+  var rows=checkItems().filter(function(i){ return c.check[i.id]&&c.check[i.id].st; }).map(function(i){ return [i.name,CHK_LBL[c.check[i.id].st],c.check[i.id].note||'']; });
+  if(rows.length) out.push({title:'Чек-лист обхода',head:['Объект / узел','Статус','Примечание'],w:[4300,2200,4107],rows:rows});
+  return out;
+}
+
+/* ---- вкладка «Обход»: сводка, чек-лист, экспликация ---- */
+function goTz(docId,si){ S.tzDoc=docId; S.tzTab=si; setView('tz'); }
+function bar(done,total){ var p=total?Math.round(done/total*100):0; return '<div class="pbar"><i style="width:'+p+'%"></i></div>'; }
+function renderWalk(){
+  var t=$('walkTabs'); t.innerHTML='';
+  [['sum','Сводка'],['chk','Чек-лист'],['rooms','Экспликация помещений']].forEach(function(x){
+    var b=el('button','btn',esc(x[1])); b.setAttribute('aria-pressed',S.walkTab===x[0]?'true':'false');
+    b.addEventListener('click',function(){ S.walkTab=x[0]; renderWalk(); }); t.appendChild(b);
+  });
+  var h=$('walkBody'); h.innerHTML='';
+  if(S.walkTab==='chk') return walkCheck(h);
+  if(S.walkTab==='rooms') return walkRooms(h);
+  walkSummary(h);
+}
+function walkSummary(h){
+  var docs=tzDocs(), c=cfg();
+  h.appendChild(el('h2',null,'Готовность ТЗ'));
+  if(!docs.length) h.appendChild(el('p','empty','ТЗ ещё нет. Создайте его на вкладке «ТЗ», и здесь появится сводка по вопросам.'));
+  docs.forEach(function(d){
+    var secs=tplSections(d.tpl), tot=0, ans=0, req=[], miss=[];
+    secs.forEach(function(s,si){ s.qs.forEach(function(q){ tot++; if(answerText(d,q)) ans++; else{ miss.push({q:q,si:si}); if(/Обязательн/i.test(q.h||'')) req.push({q:q,si:si}); } }); });
+    var box=el('div','srv'); box.style.gap='8px';
+    box.appendChild(el('div','h','<b>'+esc((d.name||'Без названия')+' · '+TPL[d.tpl].short)+'</b><span>'+ans+' из '+tot+'</span>'));
+    box.appendChild(el('div',null,bar(ans,tot)));
+    if(req.length){
+      box.appendChild(el('p',null,'<b style="color:var(--bad)">Обязательные пункты без ответа:</b>'));
+      var r=el('div','chips'); req.forEach(function(x){ var b=el('button','chip','<span class="t" style="max-width:360px;white-space:normal"><b>'+x.q.n+'.</b> '+esc(x.q.q)+'</span>'); b.addEventListener('click',function(){ goTz(d.id,x.si); }); r.appendChild(b); }); box.appendChild(r);
+    }
+    if(miss.length){
+      var det=el('details'); det.appendChild(el('summary',null,'Без ответа: '+miss.length));
+      var r2=el('div','chips'); r2.style.marginTop='6px';
+      miss.forEach(function(x){ var b=el('button','chip','<span class="t" style="max-width:360px;white-space:normal"><b>'+x.q.n+'.</b> '+esc(x.q.q)+'</span>'); b.addEventListener('click',function(){ goTz(d.id,x.si); }); r2.appendChild(b); });
+      det.appendChild(r2); box.appendChild(det);
+    }
+    h.appendChild(box);
+  });
+  var pins=Object.keys(S.pins).map(function(k){return S.pins[k]}).filter(function(p){ return p.fx!=null&&!p.sym&&!p.txt; }).sort(numSort);
+  h.appendChild(el('h2',null,'Маркеры'));
+  function group(title,list){
+    var b=el('div','srv'); b.appendChild(el('div','h','<b>'+esc(title)+'</b><span>'+list.length+'</span>'));
+    if(list.length){ var r=el('div','chips'); list.forEach(function(p){ var c=el('button','chip','<b>'+esc(pinNum(p)||'№')+'</b><span class="t">'+esc(pinLabel(p)||'без названия')+'</span>'); c.addEventListener('click',function(){ goPin(p.id); }); r.appendChild(c); }); b.appendChild(r); }
+    h.appendChild(b);
+  }
+  group('Без фото',pins.filter(function(p){ return !(p.photos&&p.photos.length); }));
+  group('Без описания',pins.filter(function(p){ return !(p.desc||'').trim(); }));
+  group('Место подтвердить (?)',pins.filter(function(p){ return p.unsure; }));
+  var items=checkItems(), done=items.filter(function(i){ return c.check[i.id]&&c.check[i.id].st; }).length;
+  h.appendChild(el('h2',null,'Обход'));
+  var o=el('div','srv'); o.appendChild(el('div','h','<b>Чек-лист объекта</b><span>отмечено '+done+' из '+items.length+'</span>')); o.appendChild(el('div',null,bar(done,items.length)));
+  o.appendChild(el('div','h','<b>Экспликация помещений</b><span>'+c.rooms.length+' строк</span>'));
+  h.appendChild(o);
+}
+function walkCheck(h){
+  var c=cfg(), items=checkItems();
+  h.appendChild(el('p','hint','Отметьте каждую точку обхода: осмотрено, не осмотрено (нет доступа) или нет на объекте. Сводка попадает в приложение к ТЗ.'));
+  items.forEach(function(it){
+    var st=(c.check[it.id]||{}).st||'';
+    var box=el('div','srv'); box.style.gap='6px';
+    var hd=el('div','h'); hd.appendChild(el('b',null,esc(it.name)));
+    if(c.items&&c.items.length&&!S.readOnly&&it.custom){ var rm=el('button','btn small danger','Убрать'); rm.addEventListener('click',function(){ c.items=c.items.filter(function(x){return x.id!==it.id}); delete c.check[it.id]; cfgSave(); renderWalk(); }); hd.appendChild(rm); }
+    box.appendChild(hd);
+    var r=el('div','chips');
+    [['ok','Осмотрено'],['no','Не осмотрено'],['na','Нет на объекте']].forEach(function(x){
+      var b=el('button','chip',esc(x[1])); b.setAttribute('aria-pressed',st===x[0]?'true':'false'); b.disabled=S.readOnly;
+      b.addEventListener('click',function(){ var e=c.check[it.id]||(c.check[it.id]={}); e.st=(e.st===x[0])?'':x[0]; cfgSave(); feedback('place'); renderWalk(); });
+      r.appendChild(b);
+    });
+    box.appendChild(r);
+    var n=el('input'); n.type='text'; n.placeholder='Примечание'; n.value=(c.check[it.id]||{}).note||''; n.disabled=S.readOnly;
+    n.addEventListener('input',function(){ var e=c.check[it.id]||(c.check[it.id]={}); e.note=n.value; cfgSave(); });
+    box.appendChild(n); h.appendChild(box);
+  });
+  if(!S.readOnly){
+    var row=el('div','row'); var ni=el('input'); ni.type='text'; ni.placeholder='Своя точка обхода'; var nb=el('button','btn small','＋ Добавить');
+    nb.addEventListener('click',function(){
+      var v=ni.value.trim(); if(!v) return;
+      if(!c.items||!c.items.length) c.items=DEF_CHECK.map(function(x){return {id:x[0],name:x[1]}});
+      c.items.push({id:uid('ck'),name:v,custom:true}); cfgSave(); renderWalk();
+    });
+    row.appendChild(field('Новая точка',ni)); row.appendChild(nb); h.appendChild(row);
+  }
+}
+function walkRooms(h){
+  var c=cfg();
+  h.appendChild(el('p','hint','Экспликация помещений — обязательный пункт шаблонов ТЗ. Добавляйте помещения по ходу обхода: таблица попадёт в приложение к ТЗ, а на вопрос об экспликации ответ подставится сам.'));
+  var tot=0; c.rooms.forEach(function(r){ tot+=parseFloat(String(r.area||'').replace(',','.'))||0; });
+  h.appendChild(el('p',null,'Помещений: <b>'+c.rooms.length+'</b>'+(tot?' · общая площадь: <b>'+(Math.round(tot*10)/10)+' м²</b>':'')));
+  var dl=el('datalist'); dl.id='ceilList'; ['Бетон','Армстронг','Гипсокартон','Натяжной','Грильято','Сэндвич-панели','Профнастил','Дерево','Подвесной'].forEach(function(x){ var o=el('option'); o.value=x; dl.appendChild(o); }); h.appendChild(dl);
+  c.rooms.forEach(function(r,i){
+    var box=el('div','srv'); var g=el('div'); g.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px';
+    function f(label,key,list,type){ var inp=el('input'); inp.type='text'; inp.value=r[key]||''; inp.disabled=S.readOnly; if(list) inp.setAttribute('list',list); if(type==='num') inp.inputMode='decimal';
+      inp.addEventListener('input',function(){ r[key]=inp.value; cfgSave(); }); return field(label,inp); }
+    g.appendChild(f('№','n')); g.appendChild(f('Назначение','purpose')); g.appendChild(f('Площадь, м²','area',null,'num')); g.appendChild(f('Высота, м','height',null,'num')); g.appendChild(f('Тип потолка','ceiling','ceilList')); g.appendChild(f('Примечание','note'));
+    box.appendChild(g);
+    var rm=el('button','btn small danger','Удалить строку'); rm.disabled=S.readOnly; rm.addEventListener('click',function(){ c.rooms.splice(i,1); cfgSave(); renderWalk(); }); box.appendChild(rm);
+    h.appendChild(box);
+  });
+  var add=el('button','btn','＋ Добавить помещение'); add.disabled=S.readOnly;
+  add.addEventListener('click',function(){ c.rooms.push({n:String(c.rooms.length+1),purpose:'',area:'',height:'',ceiling:'',note:''}); cfgSave(); feedback('place'); renderWalk(); });
+  h.appendChild(add);
+}
+
 /* ---------- init ---------- */
 function renderAll(){ renderOverlay(); renderLists(); renderCard(); }
 function applyReadOnly(){
@@ -1532,7 +2148,7 @@ function applyReadOnly(){
   setMode('sel'); renderHint(); renderCard(); renderPlanBar(); setStatus('Просмотр');
 }
 function start(){
-  normalize(); loadPlanImage(); renderPlanBar(); setMode('sel'); renderAll(); updateMeta();
+  normalize(); loadPlanImage(); renderPlanBar(); renderHelp(); renderPrefs(); document.body.classList.add('planmode'); setMode('sel'); renderAll(); updateMeta(); setTimeout(fitPlan,50);
 }
 (async function init(){
   try{ userCap=await claude.use('user'); }catch(e){ userCap=null; }

@@ -1,4 +1,4 @@
-﻿/* Офлайн-кэш приложения. Данные пользователя хранятся в IndexedDB и этим файлом не затрагиваются. */
+/* Офлайн-кэш приложения. Данные пользователя хранятся в IndexedDB и этим файлом не затрагиваются. */
 var CACHE = 'obs-tz-v1';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', function (e) {
