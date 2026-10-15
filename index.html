@@ -233,14 +233,27 @@ body.planmode{overflow:hidden}
 #ped .pedbar{display:flex;gap:8px;align-items:center;padding:8px;flex-wrap:wrap;background:var(--panel)}
 #ped .pedwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px;overflow:auto}
 #ped canvas{max-width:100%;max-height:100%;touch-action:none;background:#fff;cursor:crosshair}
-#top .ttl{display:none}
-@media (min-width:1100px){#top .ttl{display:inline}}
+#top .ttl{max-width:20vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:760px){#top .ttl{display:none}}
+@media (max-width:900px){#top .status{display:none}#top .views .btn{padding:6px 8px}#top .lbl{display:none}}
+.modal{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .mback{position:absolute;inset:0;background:rgba(6,10,20,.55)}
+.modal .mbox{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;width:min(480px,100%);display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.modal h2{margin:0;font-size:16px;color:var(--ink);text-transform:none;letter-spacing:0}
+/* v5: панели поверх чертежа не пропускают нажатия */
+.work .stage{position:relative;z-index:0}
+.rail{z-index:30}
+.flyout{z-index:31}
+.side{z-index:28}
+.work .hintbar{z-index:26}
+.work .symbar{left:calc(max(8px,env(safe-area-inset-left)) + 76px);right:auto;top:8px;bottom:auto;width:min(290px,calc(100% - 100px));max-height:calc(100% - 16px);flex-direction:column;flex-wrap:nowrap;overflow-x:hidden;overflow-y:auto;z-index:25;padding:6px}
+.work .symbar .btn{width:100%;justify-content:flex-start;text-align:left}
 </style>
 </head>
 <body>
 <div id="app">
   <header id="top">
-    <strong class="ttl">Обследование</strong>
+    <strong class="ttl" id="ttl">Обследование</strong>
     <div class="ptabs" id="ptabs" role="tablist" aria-label="Чертежи"></div>
     <span class="meta" id="meta"></span>
     <span class="grow"></span>
@@ -249,6 +262,11 @@ body.planmode{overflow:hidden}
       <button class="btn small" id="vWalk" aria-pressed="false" title="Сводка готовности, чек-лист обхода, экспликация помещений">Обход</button>
       <button class="btn small" id="vTz" aria-pressed="false" title="Техническое задание: СПС, СОУЭ, ВПВ, АУП">ТЗ</button>
       <button class="btn small" id="btnList" title="Список маркеров, чертежи, сохранение копий">Список и файлы</button>
+    </div>
+    <div class="views">
+      <button class="btn small" id="btnNew" title="Новый документ: стереть всё и начать заново">＋<span class="lbl"> Новый</span></button>
+      <button class="btn small" id="btnUndo" disabled title="Отменить последнее действие (Ctrl+Z)">↶<span class="lbl"> Отменить</span></button>
+      <button class="btn small" id="btnRedo" disabled title="Повторить отменённое (Ctrl+Y)">↷</button>
     </div>
     <button class="btn small" id="btnInstall" hidden>Установить</button>
     <span class="status" id="status">Загрузка…</span>
@@ -334,6 +352,18 @@ body.planmode{overflow:hidden}
   <img id="lbImg" alt="">
   <div class="cap" id="lbCap"></div>
   <div class="bar"><button class="btn" id="lbPrev">← Назад</button><button class="btn" id="lbNext">Вперёд →</button><button class="btn" id="lbClose">Закрыть</button></div>
+</div>
+<div class="modal" id="newdoc" hidden role="dialog" aria-modal="true" aria-label="Новый документ">
+  <div class="mback" id="ndBack"></div>
+  <div class="mbox">
+    <h2>Новый документ</h2>
+    <p class="hint">Всё из текущего документа будет стёрто: чертежи, маркеры, линии, фото, ТЗ, чек-лист, экспликация. Быстрые фразы сохранятся.</p>
+    <label class="f"><span>Название документа</span><input type="text" id="ndName" placeholder="Например: Хлебозавод, цех 2"></label>
+    <label class="f"><span>Первый чертёж (необязательно: изображение или PDF)</span><input type="file" id="ndFile" accept="image/*,application/pdf,.pdf"></label>
+    <label class="chk"><input type="checkbox" id="ndBackup" checked> Сначала сохранить резервную копию (JSON)</label>
+    <div class="row"><button class="btn danger" id="ndGo">Стереть и создать новый</button><button class="btn" id="ndCancel">Отмена</button></div>
+    <p class="hint">Сразу после создания действие можно вернуть кнопкой «Отменить».</p>
+  </div>
 </div>
 <div id="cam" hidden>
   <video id="camVideo" playsinline muted autoplay></video>
@@ -441,6 +471,7 @@ function lsSave(){
 }
 function saveSoon(kind,id){
   if(S.readOnly) return;
+  noteChange();
   if(S.store==='local'){ clearTimeout(timers.ls); timers.ls=setTimeout(lsSave,300); setStatus('Сохранение…'); return; }
   var key=kind+'/'+id; dirty[key]=true; setStatus('Сохранение…');
   clearTimeout(timers[key]); timers[key]=setTimeout(function(){flush(kind,id)},500);
@@ -454,6 +485,7 @@ function flush(kind,id){
   .catch(function(e){ inflight[key]=false; setStatus('Не сохранилось: '+(e&&e.code||'ошибка'),'bad'); if(e&&e.code==='invalid_argument'){ S.readOnly=true; applyReadOnly(); } });
 }
 function delDoc(kind,id){
+  noteChange();
   if(S.store==='local'){ clearTimeout(timers.ls); timers.ls=setTimeout(lsSave,200); return; }
   colls[kind].doc(id).delete().then(function(){setStatus('Сохранено','ok')}).catch(function(e){setStatus('Не удалилось: '+(e&&e.code||'ошибка'),'bad')});
 }
@@ -467,7 +499,7 @@ function onSnap(kind){
       if(!(cur && JSON.stringify(cur)===JSON.stringify(data))){ map[d.id]=clean(data); map[d.id].id=d.id; changed=true; }
     });
     Object.keys(map).forEach(function(id){ if(!seen[id] && !dirty[kind+'/'+id]){ delete map[id]; changed=true; if(S.sel===id) S.sel=null; } });
-    if(changed){ normalize(); renderAll(); if(S.view==='tz') renderTz(); }
+    if(changed){ normalize(); renderAll(); if(S.view==='tz') renderTz(); if(!burst) shadow=snapState(); }
     if(!Object.keys(dirty).length) setStatus('Сохранено','ok');
   };
 }
@@ -475,7 +507,18 @@ function onSnap(kind){
 /* ---------- plans ---------- */
 function plansSorted(){ return Object.keys(S.plans).map(function(k){return S.plans[k]}).sort(function(a,b){return (a.ord||0)-(b.ord||0)}); }
 function curPlan(){ return S.plans[S.planId]||plansSorted()[0]||null; }
-function planSrc(p){ return (!p||!p.img||p.img==='@builtin')?PLAN0_IMG:p.img; }
+var blankUrl=null;
+function blankImg(){
+  if(blankUrl) return blankUrl;
+  var c=document.createElement('canvas'); c.width=1600; c.height=1000; var g=c.getContext('2d');
+  g.fillStyle='#fff'; g.fillRect(0,0,1600,1000); g.strokeStyle='#E3E8F0'; g.lineWidth=1;
+  for(var x=0;x<=1600;x+=100){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,1000); g.stroke(); }
+  for(var y=0;y<=1000;y+=100){ g.beginPath(); g.moveTo(0,y); g.lineTo(1600,y); g.stroke(); }
+  g.fillStyle='#8A94A6'; g.font='600 40px sans-serif'; g.textAlign='center'; g.fillText('Чертёж не загружен',800,470);
+  g.font='28px sans-serif'; g.fillText('«＋ Чертёж» добавит изображение или PDF, «Список и файлы → Заменить изображение» подставит файл сюда',800,530);
+  blankUrl=c.toDataURL('image/png'); return blankUrl;
+}
+function planSrc(p){ return (!p||!p.img||p.img==='@builtin')?PLAN0_IMG:(p.img==='@blank'?blankImg():p.img); }
 function normalize(){
   if(!Object.keys(S.plans).length) S.plans.plan0={id:'plan0',name:'13.08 старое печное МШИ',img:'@builtin',ord:0,w:0,h:0,upd:Date.now()};
   if(!S.plans[S.planId]) S.planId=plansSorted()[0].id;
@@ -509,11 +552,14 @@ function fitPlan(){
 function setPlan(id){
   if(!S.plans[id]) return;
   cancelDraft(); S.planId=id; S.sel=null; loadPlanImage(); renderPlanBar(); renderAll(); updateMeta(); if(S.fit) setTimeout(fitPlan,0);
-  if(S.store==='local') saveSoon('plans',id);
+  if(S.store==='local'){ clearTimeout(timers.ls); timers.ls=setTimeout(lsSave,300); }
 }
+function docName(){ return (S.tzm._cfg&&S.tzm._cfg.name)||''; }
+function fileBase(){ return docName().replace(/[\\\/:*?"<>|]+/g,'').trim().replace(/\s+/g,'_').slice(0,60); }
 function updateMeta(){
-  var p=curPlan(), d=curDoc(), t=d&&d.name;
+  var p=curPlan(), d=curDoc(), nm=docName(), t=nm||(d&&d.name);
   $('meta').textContent=(t?t+' · ':'Обследование · ')+'чертёж «'+(p?p.name:'—')+'»';
+  $('ttl').textContent=nm||'Обследование'; document.title=(nm?nm+' — ':'')+'Обследование и ТЗ';
 }
 function renderPlanBar(){
   var t=$('ptabs'); t.innerHTML='';
@@ -1121,7 +1167,7 @@ $('exCsv').addEventListener('click',function(){
 });
 $('exJson').addEventListener('click',function(){
   var out={version:2,exported:new Date().toISOString(),planId:S.planId,plans:S.plans,pins:S.pins,lines:S.lines,tzs:S.tzm};
-  download('obsledovanie_kopiya.json',JSON.stringify(out),'application/json');
+  download((fileBase()||'obsledovanie')+'_kopiya.json',JSON.stringify(out),'application/json');
 });
 $('imJson').addEventListener('change',function(){
   var f=this.files[0]; this.value=''; if(!f||S.readOnly) return;
@@ -1735,7 +1781,7 @@ function renderDocTab(host,d,secs){
   function refresh(){ fr.srcdoc=fullDoc('<p>Формирование документа…</p>'); buildDoc(d,secs,S.docOpt).then(function(inner){ html=fullDoc(inner); fr.srcdoc=html; }); }
   apply.addEventListener('click',refresh);
   function need(fn){ return function(){ buildDoc(d,secs,S.docOpt).then(function(i){ html=fullDoc(i); fn(); }); }; }
-  var base='tz_'+d.tpl;
+  var base=(fileBase()?fileBase()+'_':'')+'tz_'+d.tpl;
   bx.addEventListener('click',function(){
     bx.disabled=true; setStatus('Сборка .docx…');
     buildDocx(d,secs,S.docOpt).then(function(blob){ download(base+'.docx',blob,'application/vnd.openxmlformats-officedocument.wordprocessingml.document'); setStatus('Готово','ok'); })
@@ -1771,6 +1817,7 @@ function cfgSave(){ cfg().upd=Date.now(); saveSoon('tz','_cfg'); }
 function checkItems(){ var c=cfg(); return (c.items&&c.items.length)?c.items:DEF_CHECK.map(function(x){return {id:x[0],name:x[1]}}); }
 function mergeCfg(t){
   if(!t) return; var c=cfg();
+  if(t.name&&!c.name) c.name=t.name;
   if(t.phrases&&t.phrases.length) c.phrases=t.phrases;
   if(t.items&&t.items.length) c.items=t.items;
   Object.keys(t.check||{}).forEach(function(k){ c.check[k]=t.check[k]; });
@@ -2015,6 +2062,10 @@ function tzLinkBlock(card,it){
 /* ---- настройки в панели ---- */
 function renderPrefs(){
   var h=$('prefsBox'); if(!h) return; h.innerHTML='';
+  h.appendChild(el('h2',null,'Документ'));
+  var nmI=el('input'); nmI.type='text'; nmI.placeholder='Название документа'; nmI.value=cfg().name||''; nmI.disabled=S.readOnly;
+  nmI.addEventListener('input',function(){ cfg().name=nmI.value; cfgSave(); updateMeta(); });
+  h.appendChild(field('Название (в шапке, в именах файлов)',nmI));
   h.appendChild(el('h2',null,'Быстрые фразы'));
   h.appendChild(el('p','hint','По одной фразе в строке. Они появляются под полями «Фразы ▾» и вставляются одним нажатием.'));
   var ta=el('textarea'); ta.rows=7; ta.value=cfg().phrases.join('\n'); ta.disabled=S.readOnly;
@@ -2139,6 +2190,113 @@ function walkRooms(h){
   h.appendChild(add);
 }
 
+
+/* ======= отмена действий и новый документ ======= */
+var undoSt=[], redoSt=[], shadow=null, burst=false, burstT=null, undoing=false;
+function cloneDeep(o){
+  if(o===null||typeof o!=='object') return o;
+  if(Array.isArray(o)) return o.map(cloneDeep);
+  var r={}; for(var k in o) r[k]=cloneDeep(o[k]); return r;
+}
+function snapState(){ return {pins:cloneDeep(S.pins),lines:cloneDeep(S.lines),plans:cloneDeep(S.plans),tzm:cloneDeep(S.tzm),planId:S.planId}; }
+function sameState(a,b){ return JSON.stringify([a.pins,a.lines,a.plans,a.tzm])===JSON.stringify([b.pins,b.lines,b.plans,b.tzm]); }
+function updUndoBtns(){
+  var u=$('btnUndo'), r=$('btnRedo'); if(!u||!r) return;
+  u.disabled=!undoSt.length; r.disabled=!redoSt.length;
+  u.title='Отменить последнее действие (Ctrl+Z)'+(undoSt.length?' · доступно шагов: '+undoSt.length:'');
+}
+function noteChange(){
+  if(undoing||S.readOnly) return;
+  if(!burst){
+    burst=true;
+    if(shadow){ undoSt.push(shadow); if(undoSt.length>30) undoSt.shift(); redoSt.length=0; updUndoBtns(); }
+  }
+  clearTimeout(burstT);
+  burstT=setTimeout(function(){ burst=false; shadow=snapState(); },700);
+}
+function applyState(snap){
+  var prev={pins:S.pins,lines:S.lines,plans:S.plans,tz:S.tzm};
+  undoing=true;
+  try{
+    S.pins=cloneDeep(snap.pins); S.lines=cloneDeep(snap.lines); S.plans=cloneDeep(snap.plans); S.tzm=cloneDeep(snap.tzm);
+    normalize();
+    if(snap.planId&&S.plans[snap.planId]) S.planId=snap.planId;
+    if(S.store==='local'){ clearTimeout(timers.ls); timers.ls=setTimeout(lsSave,200); setStatus('Сохранение…'); }
+    else ['pins','lines','plans','tz'].forEach(function(kind){
+      var pm=prev[kind], nm=mapOf(kind);
+      Object.keys(pm).forEach(function(id){ if(!nm[id]) delDoc(kind,id); });
+      Object.keys(nm).forEach(function(id){ if(JSON.stringify(pm[id])!==JSON.stringify(nm[id])) saveSoon(kind,id); });
+    });
+  } finally { undoing=false; }
+  if(S.sel&&!getSel()) S.sel=null;
+  cancelDraft(); loadPlanImage(); renderPlanBar(); renderAll(); renderPrefs(); updateMeta();
+  if(S.view==='tz') renderTz(); if(S.view==='walk') renderWalk();
+  if(S.fit) setTimeout(fitPlan,0);
+  clearTimeout(burstT); burst=false; shadow=snapState(); updUndoBtns();
+}
+function undo(){
+  if(S.readOnly) return;
+  var cur=snapState(), snap=null;
+  while(undoSt.length){ var c=undoSt.pop(); if(!sameState(c,cur)){ snap=c; break; } }
+  if(!snap){ updUndoBtns(); toast('Нечего отменять'); return; }
+  redoSt.push(cur); applyState(snap); toast('Действие отменено');
+}
+function redo(){
+  if(S.readOnly) return;
+  var cur=snapState(), snap=null;
+  while(redoSt.length){ var c=redoSt.pop(); if(!sameState(c,cur)){ snap=c; break; } }
+  if(!snap){ updUndoBtns(); return; }
+  undoSt.push(cur); applyState(snap); toast('Действие возвращено');
+}
+$('btnUndo').addEventListener('click',undo);
+$('btnRedo').addEventListener('click',redo);
+document.addEventListener('keydown',function(e){
+  if(!(e.ctrlKey||e.metaKey)) return;
+  var tg=(document.activeElement&&document.activeElement.tagName)||'';
+  if(/INPUT|TEXTAREA|SELECT/.test(tg)) return;
+  var k=(e.key||'').toLowerCase();
+  if(k==='z'&&!e.shiftKey){ e.preventDefault(); undo(); }
+  else if(k==='y'||(k==='z'&&e.shiftKey)){ e.preventDefault(); redo(); }
+});
+
+function newDocument(name,arr){
+  noteChange();
+  ['pins','lines','plans','tz'].forEach(function(kind){
+    Object.keys(mapOf(kind)).forEach(function(id){ if(kind==='tz'&&id==='_cfg') return; delDoc(kind,id); });
+  });
+  var phr=cfg().phrases.slice();
+  S.pins={}; S.lines={}; S.plans={}; S.tzm={};
+  var c=cfg(); c.phrases=phr; c.name=name;
+  if(arr&&arr.length){
+    arr.forEach(function(d,i){ var pl={id:uid('pl'),name:d.name,img:d.img,w:d.w,h:d.h,ord:i,upd:Date.now()}; S.plans[pl.id]=pl; saveSoon('plans',pl.id); });
+  } else {
+    S.plans.plan0={id:'plan0',name:'Новый чертёж',img:'@blank',w:1600,h:1000,ord:0,upd:Date.now()}; saveSoon('plans','plan0');
+  }
+  S.planId=plansSorted()[0].id; S.sel=null; S.tzDoc=null; S.tzTab=0; S.walkTab='sum'; S.fit=true;
+  cfgSave();
+  cancelDraft(); setMode('sel'); loadPlanImage(); renderPlanBar(); renderAll(); renderPrefs(); updateMeta();
+  setView('plan'); setTimeout(fitPlan,0);
+}
+function openNewDoc(){
+  if(S.readOnly){ toast('Режим просмотра: создать документ нельзя.'); return; }
+  $('ndName').value=''; $('ndFile').value=''; $('newdoc').hidden=false; setTimeout(function(){ $('ndName').focus(); },50);
+}
+function closeNewDoc(){ $('newdoc').hidden=true; }
+$('btnNew').addEventListener('click',openNewDoc);
+$('ndCancel').addEventListener('click',closeNewDoc);
+$('ndBack').addEventListener('click',closeNewDoc);
+$('ndGo').addEventListener('click',function(){
+  var name=$('ndName').value.trim();
+  if(!name){ toast('Введите название документа.'); $('ndName').focus(); return; }
+  if($('ndBackup').checked) $('exJson').click();
+  var f=$('ndFile').files[0], btn=this; btn.disabled=true;
+  (f?fileToDrawings(f,12):Promise.resolve(null)).then(function(arr){
+    newDocument(name,arr); closeNewDoc(); toast('Создан документ «'+name+'». Кнопка «Отменить» вернёт прежний.');
+  }).catch(function(e){
+    toast(e&&e.message==='pdfjs'?'Не удалось открыть PDF. Сохраните лист как PNG/JPG.':'Не удалось прочитать файл чертежа.');
+  }).then(function(){ btn.disabled=false; });
+});
+
 /* ---------- init ---------- */
 function renderAll(){ renderOverlay(); renderLists(); renderCard(); }
 function applyReadOnly(){
@@ -2148,7 +2306,7 @@ function applyReadOnly(){
   setMode('sel'); renderHint(); renderCard(); renderPlanBar(); setStatus('Просмотр');
 }
 function start(){
-  normalize(); loadPlanImage(); renderPlanBar(); renderHelp(); renderPrefs(); document.body.classList.add('planmode'); setMode('sel'); renderAll(); updateMeta(); setTimeout(fitPlan,50);
+  normalize(); loadPlanImage(); renderPlanBar(); renderHelp(); renderPrefs(); document.body.classList.add('planmode'); setMode('sel'); renderAll(); updateMeta(); setTimeout(fitPlan,50); shadow=snapState(); updUndoBtns();
 }
 (async function init(){
   try{ userCap=await claude.use('user'); }catch(e){ userCap=null; }
