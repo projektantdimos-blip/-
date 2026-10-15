@@ -1023,9 +1023,11 @@ function finishLine(){
 }
 (function(){
   var cap=$('cap'), freeDown=false, lastClick=0;
-  cap.addEventListener('pointerdown',function(e){
-    if(S.readOnly){ toast('Правки отключены: у вас режим просмотра.'); return; }
-    var p=relPos(e);
+  var ptr={}, multi=false, tap=null;
+  function nPtr(){ return Object.keys(ptr).length; }
+  /* Постановка маркеров, знаков, текста и точек линии — только по короткому одиночному касанию:
+     если на экране два пальца (масштабирование) или палец сдвинулся, ничего не ставится. */
+  function place(p){
     if(S.mode==='pin'){
       var pf=S.pinPhoto, pin=newPin(p[0],p[1]); S.sel=pin.id; feedback('place'); setMode('sel'); renderAll();
       if(pf) openCamera(pin); else setTimeout(function(){var t=$('fTitle'); if(t) t.focus();},50);
@@ -1044,7 +1046,6 @@ function finishLine(){
     if(S.mode==='sym'){
       var sy=newSym(S.symId,p[0],p[1]); S.sel=sy.id; feedback('place'); renderOverlay(); renderLists(); renderCard(); return;
     }
-    if(S.mode==='free'){ freeDown=true; S.draft={pts:[p]}; try{cap.setPointerCapture(e.pointerId)}catch(_){} drawDraft(); renderHint(); return; }
     if(S.mode==='line'){
       var now=Date.now();
       if(S.draft && now-lastClick<320){ finishLine(); lastClick=0; return; }
@@ -1052,14 +1053,36 @@ function finishLine(){
       if(!S.draft){ S.draft={pts:[p]}; } else { var last=S.draft.pts[S.draft.pts.length-1]; if(Math.hypot((p[0]-last[0])*VBW,(p[1]-last[1])*VBH)>1.5) S.draft.pts.push(p); }
       drawDraft(); renderHint();
     }
+  }
+  cap.addEventListener('pointerdown',function(e){
+    ptr[e.pointerId]=[e.clientX,e.clientY];
+    if(nPtr()>=2){
+      multi=true; tap=null; freeDown=false;
+      if(S.draft){ cancelDraft(); renderHint(); }
+      return;
+    }
+    if(S.readOnly){ toast('Правки отключены: у вас режим просмотра.'); return; }
+    multi=false;
+    var p=relPos(e);
+    if(S.mode==='free'){ freeDown=true; S.draft={pts:[p]}; try{cap.setPointerCapture(e.pointerId)}catch(_){} drawDraft(); renderHint(); return; }
+    tap={id:e.pointerId,x:e.clientX,y:e.clientY,t:Date.now(),p:p};
   });
   cap.addEventListener('pointermove',function(e){
-    if(!S.draft) return;
+    if(ptr[e.pointerId]) ptr[e.pointerId]=[e.clientX,e.clientY];
+    if(tap && e.pointerId===tap.id && Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>14) tap=null;
+    if(multi||!S.draft) return;
     var p=relPos(e);
     if(S.mode==='free' && freeDown){ var last=S.draft.pts[S.draft.pts.length-1]; if(Math.hypot((p[0]-last[0])*VBW,(p[1]-last[1])*VBH)>2.5){ S.draft.pts.push(p); drawDraft(); } }
     else if(S.mode==='line'){ drawDraft(p); }
   });
-  function up(e){ if(S.mode==='free' && freeDown){ freeDown=false; try{cap.releasePointerCapture(e.pointerId)}catch(_){} finishLine(); } }
+  function up(e){
+    var ok=tap && tap.id===e.pointerId && !multi && e.type==='pointerup' && Date.now()-tap.t<900;
+    var t=tap; delete ptr[e.pointerId];
+    if(tap && tap.id===e.pointerId) tap=null;
+    if(nPtr()===0){ multi=false; }
+    if(ok) place(t.p);
+    if(S.mode==='free' && freeDown){ freeDown=false; try{cap.releasePointerCapture(e.pointerId)}catch(_){} finishLine(); }
+  }
   cap.addEventListener('pointerup',up); cap.addEventListener('pointercancel',up);
 })();
 
