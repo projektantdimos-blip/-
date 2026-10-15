@@ -250,6 +250,16 @@ body.planmode{overflow:hidden}
 .work .hintbar{z-index:26}
 .work .symbar{left:calc(max(8px,env(safe-area-inset-left)) + 76px);right:auto;top:8px;bottom:auto;width:min(290px,calc(100% - 100px));max-height:calc(100% - 16px);flex-direction:column;flex-wrap:nowrap;overflow-x:hidden;overflow-y:auto;z-index:25;padding:6px}
 .work .symbar .btn{width:100%;justify-content:flex-start;text-align:left}
+/* v6: значки на чертеже вдвое меньше (область нажатия увеличена невидимым полем) */
+.pin{min-width:16px;height:16px;padding:0 3px;border-radius:8px;border-width:1.5px;font-size:8px}
+.pin::after{content:"";position:absolute;inset:-9px}
+.pin .q{top:-5px;right:-5px;width:9px;height:9px;font-size:6px;line-height:9px;border-width:.5px}
+.pin .cm{bottom:-4px;right:-4px;min-width:8px;height:8px;border-radius:4px;font-size:5px;line-height:8px;padding:0 1px;border-width:.5px}
+.pin .lbl{font-size:8px;padding:2px 3px;margin-left:3px;max-width:140px}
+.pin.sym{min-width:17px;height:17px;border-radius:5px;padding:0}
+.pin.sym svg{width:12px;height:12px}
+.pin.sym .g{font-size:6px}
+.pin[aria-pressed="true"]{box-shadow:0 0 0 2px rgba(232,89,12,.3),0 1px 3px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
@@ -1337,7 +1347,7 @@ function renderPlanCanvas(plan){
         }
         if(l.label){ var m=l.pts[Math.floor(l.pts.length/2)]; g.font='600 '+(W/110)+'px sans-serif'; g.lineWidth=W/400; g.strokeStyle='#fff'; g.strokeText(l.label,m[0]*W+8,m[1]*H-10); g.fillStyle=l.color||'#FF7800'; g.fillText(l.label,m[0]*W+8,m[1]*H-10); }
       });
-      var r=W/60;
+      var r=W/120;
       Object.keys(S.pins).forEach(function(k){
         var p=S.pins[k]; if(p.fx==null||p.planId!==plan.id) return; var x=p.fx*W,y=p.fy*H;
         if(p.txt){
