@@ -260,6 +260,16 @@ body.planmode{overflow:hidden}
 .pin.sym svg{width:12px;height:12px}
 .pin.sym .g{font-size:6px}
 .pin[aria-pressed="true"]{box-shadow:0 0 0 2px rgba(232,89,12,.3),0 1px 3px rgba(0,0,0,.45)}
+/* v7: блок «Масштаб» всегда на экране */
+.zoomc{position:absolute;right:10px;bottom:10px;z-index:27;display:flex;align-items:center;gap:4px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.zoomc .btn{min-height:44px;min-width:44px;padding:4px 10px;font-weight:600}
+.zoomc .zl{font:500 12px var(--mono);min-width:44px;text-align:center;color:var(--muted)}
+.zoomc .sc{display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.1;font-weight:500;font-size:12px;margin-left:2px}
+.zoomc .sc small{font-size:11px;font-weight:400;color:var(--muted)}
+.zoomc .sc.ok small{color:var(--ok)}
+.zoomc .sc.bad small{color:var(--bad)}
+@media (orientation:landscape){ .work.sheet-open .zoomc{right:calc(max(300px,min(400px,36%)) + 24px)} }
+@media (orientation:portrait){ .zoomc{top:10px;bottom:auto} }
 </style>
 </head>
 <body>
@@ -302,9 +312,6 @@ body.planmode{overflow:hidden}
       <button class="btn" id="mSym" aria-pressed="false" title="Условные знаки"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><circle cx="17" cy="7.5" r="3.5"/><path d="M4 20l3.5-6 3.5 6z"/></svg><span>Знаки</span></button>
       <div class="swatches" id="sws" role="group" aria-label="Цвет линии"></div>
       <hr>
-      <button class="btn" id="zin" aria-label="Увеличить"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"/></svg><span>Ближе</span></button>
-      <button class="btn" id="zout" aria-label="Уменьшить"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M8 11h6"/></svg><span>Дальше</span></button>
-      <button class="btn" id="zfit" title="Вписать чертёж в экран"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Вписать</span></button>
       <button class="btn" id="lblBtn" aria-pressed="true" title="Подписи у маркеров"><svg viewBox="0 0 24 24"><path d="M4 12l8-8h8v8l-8 8z"/><circle cx="15" cy="9" r="1.2"/></svg><span>Подписи</span></button>
       <button class="btn" id="mLock" aria-pressed="false" title="Закрепить маркеры: не сдвинутся при касании"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg><span>Закрепить</span></button>
     </div>
@@ -315,17 +322,27 @@ body.planmode{overflow:hidden}
       <button class="btn" id="mZone" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 7l9-3 5 6-3 9-9 1z"/></svg>Зона (контур)</button>
       <button class="btn" id="mText" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13M9 19h6"/></svg>Текст</button>
       <button class="btn" id="mRoom" aria-pressed="false" title="Обвести помещение: площадь посчитается по масштабу, строка попадёт в экспликацию"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 11h6M14 5v6"/></svg>Помещение (контур)</button>
-      <button class="btn" id="mScale" aria-pressed="false" title="Задать масштаб чертежа по известному размеру"><svg viewBox="0 0 24 24"><path d="M3 17h18M3 13v8M21 13v8M8 17v-3M12 17v-4M16 17v-3"/></svg>Масштаб чертежа</button>
     </div>
     <div class="flyout" id="replanMenu" hidden>
-      <button class="btn" id="mDemo" aria-pressed="false" title="Проведите линию по стене: она будет стёрта с чертежа"><svg viewBox="0 0 24 24"><path d="M4 12h16" stroke-dasharray="3 3"/><path d="M7 7l10 10M17 7L7 17"/></svg>Снести стену (по линии)</button>
-      <button class="btn" id="mOpening" aria-pressed="false" title="Проём в стене (дверь, арка): линия поперёк стены в месте проёма"><svg viewBox="0 0 24 24"><path d="M4 12h5M15 12h5"/><path d="M9 8v8M15 8v8" stroke-dasharray="2 2"/></svg>Проём (дверь, арка)</button>
-      <button class="btn" id="mErase" aria-pressed="false" title="Обведите область: всё внутри будет стёрто"><svg viewBox="0 0 24 24"><path d="M5 7l9-3 5 6-3 9-9 1z" stroke-dasharray="3 3"/></svg>Стереть область (контур)</button>
-      <button class="btn" id="mWall" aria-pressed="false" title="Нарисовать новую стену"><svg viewBox="0 0 24 24"><path d="M4 16h16" stroke-width="5"/></svg>Новая стена</button>
-      <span class="hint" style="margin:4px 4px 0">Толщина стены</span>
-      <div class="chips" id="wallTw" style="padding:0 4px"></div>
-      <label class="chk" style="padding:6px 4px"><input type="checkbox" id="rpShowDemo" checked> Пунктир на снесённом</label>
-      <label class="chk" style="padding:0 4px 4px"><input type="checkbox" id="rpBefore"> Показать «до» (скрыть изменения)</label>
+      <button class="btn" id="mDemo" aria-pressed="false" title="Ведите пальцем по стене: она стирается, как ластиком"><svg viewBox="0 0 24 24"><path d="M5 17l8-10 6 5-8 10H7z"/><path d="M8 20h12"/></svg>Стереть (ластик)</button>
+      <span class="hint" style="margin:2px 6px 0">Размер ластика</span>
+      <div class="chips" id="eraserTw" style="padding:0 6px"></div>
+      <hr>
+      <button class="btn" id="mWall" aria-pressed="false" title="Нарисовать новую стену: точки по оси стены"><svg viewBox="0 0 24 24"><path d="M4 16h16" stroke-width="5"/></svg>Новая стена</button>
+      <span class="hint" style="margin:2px 6px 0">Толщина стены</span>
+      <div class="chips" id="wallTw" style="padding:0 6px"></div>
+      <hr>
+      <button class="btn" id="mDoor" aria-pressed="false" title="Дверь: две точки — края проёма, значок двери с дугой открывания"><svg viewBox="0 0 24 24"><path d="M5 19V5M5 19h14"/><path d="M5 5a14 14 0 0114 14" stroke-dasharray="3 2"/></svg>Дверь</button>
+      <hr>
+      <label class="chk" style="padding:4px 6px"><input type="checkbox" id="rpShowDemo"> Показывать стёртое пунктиром</label>
+      <label class="chk" style="padding:0 6px 6px"><input type="checkbox" id="rpBefore"> Показать «до» (скрыть изменения)</label>
+    </div>
+    <div class="zoomc" id="zoomc" role="group" aria-label="Масштаб">
+      <button class="btn" id="zout" aria-label="Уменьшить">−</button>
+      <span class="zl" id="zlvl">100%</span>
+      <button class="btn" id="zin" aria-label="Увеличить">＋</button>
+      <button class="btn" id="zfit" title="Вписать чертёж в экран">Вписать</button>
+      <button class="btn sc" id="mScale" aria-pressed="false" title="Задать масштаб чертежа по известному размеру (нужен для площадей и длин)"><span>Задать масштаб</span><small id="scaleSt">не задан</small></button>
     </div>
     <div class="symbar" id="symbar" hidden></div>
     <div class="hintbar" id="hint"></div>
@@ -575,7 +592,7 @@ function fitPlan(){
   var nw=(p&&p.w)||im.naturalWidth, nh=(p&&p.h)||im.naturalHeight;
   if(!nw||!nh||!sc.clientWidth||!sc.clientHeight) return;
   var z=Math.min(1,sc.clientHeight/(sc.clientWidth*nh/nw));
-  S.z=Math.max(.25,z); S.fit=true; $('stage').style.width=(S.z*100)+'%';
+  S.z=Math.max(.25,z); S.fit=true; $('stage').style.width=(S.z*100)+'%'; setTimeout(updScaleUI,0);
   sc.scrollLeft=0; sc.scrollTop=0;
 }
 function setPlan(id){
@@ -738,7 +755,7 @@ function newSym(symId,fx,fy){
 }
 function newLine(pts){
   var l={id:uid('l'),pts:pts,kind:(S.lineKind==='room'?'zone':(S.lineKind||'line')),label:'',color:S.color,planId:S.planId,comments:[],upd:Date.now()};
-  if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'){ l.tw=defaultTw(); l.color=(l.kind==='demo')?'#E11D2E':(l.kind==='opening'?'#1464D7':'#111111'); }
+  if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'){ l.tw=(l.kind==='demo')?(S.eraserTw||8):defaultTw(); l.color=(l.kind==='demo')?'#E11D2E':((l.kind==='opening'||l.kind==='door')?'#1464D7':'#111111'); }
   S.lines[l.id]=l; saveSoon('lines',l.id); return l;
 }
 function getSel(){ return S.pins[S.sel]||S.lines[S.sel]||null; }
@@ -747,7 +764,7 @@ function onPlan(it){ return it.planId===S.planId; }
 
 /* ---------- rendering: overlay ---------- */
 function renderOverlay(){
-  var ov=$('ov'); ov.innerHTML='';
+  var ov=$('ov'); ov.innerHTML=''; updScaleUI();
   lineOrder().forEach(function(id){
     var l=S.lines[id]; if(!l.pts||l.pts.length<2||!onPlan(l)) return;
     if(S.hideReplan&&isReplan(l)) return;
@@ -757,15 +774,22 @@ function renderOverlay(){
     vis.setAttribute('points',pts); vis.setAttribute('class','vis'+(S.sel===id?' sel':'')); vis.setAttribute('stroke',l.color||'#FF7800'); vis.setAttribute('stroke-width',S.sel===id?'5':'3.5');
     if(l.kind==='erase'){ vis.style.fill='#fff'; vis.style.fillOpacity='1'; vis.setAttribute('stroke','none'); }
     else if(zone){ vis.style.fill=l.color||'#FF7800'; vis.style.fillOpacity='.16'; }
-    if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'){
-      vis.setAttribute('stroke',(l.kind==='demo'||l.kind==='opening')?'#fff':(l.color||'#111111')); vis.setAttribute('stroke-width',l.tw||defaultTw());
-      vis.setAttribute('stroke-linecap','butt'); vis.setAttribute('stroke-linejoin','miter'); vis.style.vectorEffect='none';
+    if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'){
+      vis.setAttribute('stroke',(l.kind==='demo'||l.kind==='opening'||l.kind==='door')?'#fff':(l.color||'#111111')); vis.setAttribute('stroke-width',l.tw||defaultTw());
+      vis.setAttribute('stroke-linecap',l.kind==='demo'?'round':'butt'); vis.setAttribute('stroke-linejoin',l.kind==='demo'?'round':'miter'); vis.style.vectorEffect='none';
     }
     ov.appendChild(vis);
     if((l.kind==='demo'||l.kind==='erase'||l.kind==='opening')&&S.showDemo!==false){
       var ind=document.createElementNS(NSV,l.kind==='erase'?'polygon':'polyline');
       ind.setAttribute('points',pts); ind.setAttribute('fill','none'); ind.setAttribute('stroke',l.kind==='opening'?'#1464D7':'#E11D2E'); ind.setAttribute('stroke-width',S.sel===id?'3':'1.5');
       ind.setAttribute('stroke-dasharray','6 4'); ind.setAttribute('vector-effect','non-scaling-stroke'); ind.style.pointerEvents='none'; ov.appendChild(ind);
+    }
+    if(l.kind==='door'){
+      var dg=doorShape(l,VBW,VBH), dc=l.color||'#1464D7';
+      var leaf=document.createElementNS(NSV,'polyline'); leaf.setAttribute('points',dg.ax.toFixed(1)+','+dg.ay.toFixed(1)+' '+dg.ex.toFixed(1)+','+dg.ey.toFixed(1));
+      leaf.setAttribute('fill','none'); leaf.setAttribute('stroke',dc); leaf.setAttribute('stroke-width',S.sel===id?'3.5':'2.5'); leaf.setAttribute('vector-effect','non-scaling-stroke'); leaf.style.pointerEvents='none'; ov.appendChild(leaf);
+      var arc=document.createElementNS(NSV,'path'); arc.setAttribute('d','M '+dg.bx.toFixed(1)+' '+dg.by.toFixed(1)+' A '+dg.L.toFixed(1)+' '+dg.L.toFixed(1)+' 0 0 '+dg.sweep+' '+dg.ex.toFixed(1)+' '+dg.ey.toFixed(1));
+      arc.setAttribute('fill','none'); arc.setAttribute('stroke',dc); arc.setAttribute('stroke-width','1.5'); arc.setAttribute('stroke-dasharray','4 3'); arc.setAttribute('vector-effect','non-scaling-stroke'); arc.style.pointerEvents='none'; ov.appendChild(arc);
     }
     if(l.kind==='arrow'){
       var pa=l.pts[l.pts.length-2], pb=l.pts[l.pts.length-1], ax=pa[0]*VBW, ay=pa[1]*VBH, bx=pb[0]*VBW, by=pb[1]*VBH, an=Math.atan2(by-ay,bx-ax), HL=17;
@@ -959,17 +983,22 @@ function renderLineCard(card,l){
     card.appendChild(el('p',null,'<b>Помещение</b>: '+esc(rr?roomLabel(rr):'данные не заполнены')));
     var rb=el('button','btn small','Данные помещения'); rb.addEventListener('click',function(){ openRoomForm(l,rr||null); }); card.appendChild(rb);
   } else card.appendChild(field('Подпись',lb));
-  var ks=el('select'); [['line','Линия'],['arrow','Стрелка'],['zone','Зона (контур)'],['demo','Снос стены'],['opening','Проём'],['erase','Стирание области'],['wall','Новая стена']].forEach(function(k){ var o=el('option',null,k[1]); o.value=k[0]; ks.appendChild(o); });
+  var ks=el('select'); [['line','Линия'],['arrow','Стрелка'],['zone','Зона (контур)'],['demo','Стёртое (ластик)'],['wall','Новая стена'],['door','Дверь'],['opening','Проём'],['erase','Стирание области']].forEach(function(k){ var o=el('option',null,k[1]); o.value=k[0]; ks.appendChild(o); });
   ks.value=l.kind||'line'; ks.disabled=S.readOnly; ks.addEventListener('change',function(){ l.kind=ks.value; touch(l); });
   card.appendChild(field('Тип',ks));
-  if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'){
-    card.appendChild(el('span','hint','Толщина'));
+  if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'){
+    card.appendChild(el('span','hint',l.kind==='demo'?'Размер ластика':'Толщина'));
     var tcw=el('div','chips');
-    twPresets().forEach(function(t){
+    (l.kind==='demo'?eraserPresets():twPresets()).forEach(function(t){
       var b=el('button','chip',esc(t.label)); b.setAttribute('aria-pressed',Math.abs((l.tw||defaultTw())-t.tw)<0.01?'true':'false'); b.disabled=S.readOnly;
       b.addEventListener('click',function(){ l.tw=t.tw; touch(l); renderCard(); }); tcw.appendChild(b);
     });
     card.appendChild(tcw);
+  }
+  if(l.kind==='door'){
+    var fl=el('label','chk'), fc=el('input'); fc.type='checkbox'; fc.checked=!!l.flip; fc.disabled=S.readOnly;
+    fc.addEventListener('change',function(){ l.flip=fc.checked; touch(l); });
+    fl.appendChild(fc); fl.appendChild(document.createTextNode('Открывается в другую сторону')); card.appendChild(fl);
   }
   var sw=el('div','swatches'); sw.setAttribute('role','group'); sw.setAttribute('aria-label','Цвет линии');
   COLORS.forEach(function(c){ var b=el('button','sw'); b.style.background=c[0]; b.title=c[1]; b.setAttribute('aria-label',c[1]); b.setAttribute('aria-pressed',l.color===c[0]?'true':'false'); b.disabled=S.readOnly;
@@ -1048,7 +1077,7 @@ var HINTS={
 };
 function setMode(m,o){
   cancelDraft(); S.mode=m; o=o||{}; S.pinPhoto=!!o.pinPhoto; S.lineKind=o.lineKind||'line';
-  var pr={mSel:m==='sel',mPin:m==='pin'&&!S.pinPhoto,mPinPh:m==='pin'&&S.pinPhoto,mLine:m==='line'&&S.lineKind==='line',mArrow:m==='line'&&S.lineKind==='arrow',mZone:m==='line'&&S.lineKind==='zone',mRoom:m==='line'&&S.lineKind==='room',mDemo:m==='line'&&S.lineKind==='demo',mOpening:m==='line'&&S.lineKind==='opening',mErase:m==='line'&&S.lineKind==='erase',mWall:m==='line'&&S.lineKind==='wall',mReplan:m==='line'&&(S.lineKind==='demo'||S.lineKind==='erase'||S.lineKind==='wall'||S.lineKind==='opening'),mScale:m==='scale',mFree:m==='free',mText:m==='text',mSym:m==='sym',mDraw:m==='line'||m==='free'||m==='text'||m==='scale'};
+  var pr={mSel:m==='sel',mPin:m==='pin'&&!S.pinPhoto,mPinPh:m==='pin'&&S.pinPhoto,mLine:m==='line'&&S.lineKind==='line',mArrow:m==='line'&&S.lineKind==='arrow',mZone:m==='line'&&S.lineKind==='zone',mRoom:m==='line'&&S.lineKind==='room',mDemo:m==='free'&&S.lineKind==='demo',mDoor:m==='line'&&S.lineKind==='door',mErase:m==='line'&&S.lineKind==='erase',mWall:m==='line'&&S.lineKind==='wall',mReplan:(m==='free'&&S.lineKind==='demo')||(m==='line'&&(S.lineKind==='wall'||S.lineKind==='door')),mScale:m==='scale',mFree:m==='free'&&S.lineKind==='line',mText:m==='text',mSym:m==='sym',mDraw:(m==='line'&&S.lineKind!=='wall'&&S.lineKind!=='door')||(m==='free'&&S.lineKind==='line')||m==='text'};
   Object.keys(pr).forEach(function(k){ var e=$(k); if(e) e.setAttribute('aria-pressed',pr[k]?'true':'false'); });
   $('drawMenu').hidden=true; $('replanMenu').hidden=true;
   $('viewPlan').setAttribute('data-mode',m); renderCard();
@@ -1079,12 +1108,17 @@ function drawDraft(extra){
   var pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
   pl.setAttribute('points',pts.map(function(p){return (p[0]*VBW)+','+(p[1]*VBH)}).join(' '));
   pl.setAttribute('fill','none'); pl.setAttribute('stroke',S.color); pl.setAttribute('stroke-width','3.5'); pl.setAttribute('vector-effect','non-scaling-stroke'); pl.setAttribute('stroke-linecap','round'); pl.setAttribute('stroke-linejoin','round'); pl.setAttribute('stroke-dasharray','6 4');
+  if(S.mode==='free'&&S.lineKind==='demo'){ pl.setAttribute('stroke','#8C96A8'); pl.setAttribute('stroke-opacity','.55'); pl.setAttribute('stroke-width',S.eraserTw||8); pl.removeAttribute('vector-effect'); pl.removeAttribute('stroke-dasharray'); }
   svg.appendChild(pl);
-  S.draft.pts.forEach(function(p){ var c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',p[0]*VBW); c.setAttribute('cy',p[1]*VBH); c.setAttribute('r','2.5'); c.setAttribute('fill',S.color); svg.appendChild(c); });
+  if(!(S.mode==='free'&&S.lineKind==='demo')) S.draft.pts.forEach(function(p){ var c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',p[0]*VBW); c.setAttribute('cy',p[1]*VBH); c.setAttribute('r','2.5'); c.setAttribute('fill',S.color); svg.appendChild(c); });
 }
 function finishLine(){
   if(!S.draft){ return; }
   var pts=S.draft.pts; cancelDraft();
+  if(S.lineKind==='demo'&&S.mode==='free'){
+    if(pts.length===1) pts=[pts[0],[pts[0][0]+0.0004,pts[0][1]]];
+    newLine(pts); feedback('place'); renderOverlay(); renderLists(); renderHint(); return;
+  }
   if((S.lineKind==='zone'||S.lineKind==='erase')&&pts.length<3){ toast('Для контура нужно минимум 3 точки.'); renderHint(); return; }
   if(S.lineKind==='room'){
     if(pts.length<3){ toast('Для помещения нужно минимум 3 точки.'); renderHint(); return; }
@@ -1127,10 +1161,11 @@ function finishLine(){
     }
     if(S.mode==='line'){
       var now=Date.now();
-      if(S.draft && now-lastClick<320){ finishLine(); lastClick=0; return; }
+      if(S.draft && now-lastClick<320 && S.lineKind!=='door'){ finishLine(); lastClick=0; return; }
       lastClick=now;
       if(!S.draft){ S.draft={pts:[p]}; } else { var last=S.draft.pts[S.draft.pts.length-1]; if(Math.hypot((p[0]-last[0])*VBW,(p[1]-last[1])*VBH)>1.5) S.draft.pts.push(p); }
       drawDraft(); renderHint();
+      if(S.lineKind==='door'&&S.draft&&S.draft.pts.length>=2) finishLine();
     }
   }
   cap.addEventListener('pointerdown',function(e){
@@ -1185,15 +1220,14 @@ function finishLine(){
   $('mZone').addEventListener('click',function(){ tgl('line',{lineKind:'zone'}); });
   $('mText').addEventListener('click',function(){ tgl('text'); });
   $('mRoom').addEventListener('click',function(){ tgl('line',{lineKind:'room'}); });
-  $('mDemo').addEventListener('click',function(){ tgl('line',{lineKind:'demo'}); });
-  $('mOpening').addEventListener('click',function(){ tgl('line',{lineKind:'opening'}); });
-  $('mErase').addEventListener('click',function(){ tgl('line',{lineKind:'erase'}); });
+  $('mDemo').addEventListener('click',function(){ tgl('free',{lineKind:'demo'}); });
+  $('mDoor').addEventListener('click',function(){ tgl('line',{lineKind:'door'}); });
   $('mWall').addEventListener('click',function(){ tgl('line',{lineKind:'wall'}); });
   $('mReplan').addEventListener('click',function(){
     var m=$('replanMenu');
-    if(S.mode==='line'&&(S.lineKind==='demo'||S.lineKind==='erase'||S.lineKind==='wall'||S.lineKind==='opening')){ setMode('sel'); return; }
+    if((S.mode==='free'&&S.lineKind==='demo')||(S.mode==='line'&&(S.lineKind==='wall'||S.lineKind==='door'))){ setMode('sel'); return; }
     if(!m.hidden){ m.hidden=true; return; }
-    $('drawMenu').hidden=true; renderWallTw(); m.hidden=false;
+    $('drawMenu').hidden=true; renderWallTw(); renderEraserTw(); m.hidden=false;
     var r=$('mReplan').getBoundingClientRect(), w=$('viewPlan').getBoundingClientRect();
     m.style.left=(r.right-w.left+8)+'px'; m.style.top=Math.max(8,Math.min(r.top-w.top,w.height-m.offsetHeight-8))+'px';
   });
@@ -1202,7 +1236,7 @@ function finishLine(){
   $('mScale').addEventListener('click',function(){ tgl('scale'); });
   $('mDraw').addEventListener('click',function(){
     var m=$('drawMenu');
-    if(S.mode==='line'||S.mode==='free'||S.mode==='text'||S.mode==='scale'){ setMode('sel'); return; }
+    if((S.mode==='line'&&S.lineKind!=='wall'&&S.lineKind!=='door')||(S.mode==='free'&&S.lineKind==='line')||S.mode==='text'){ setMode('sel'); return; }
     if(!m.hidden){ m.hidden=true; return; }
     m.hidden=false;
     var r=$('mDraw').getBoundingClientRect(), w=$('viewPlan').getBoundingClientRect();
@@ -1229,7 +1263,7 @@ function setZoom(v,mx,my){
   var sc=$('scroll'), st=$('stage'), r=sc.getBoundingClientRect(), old=st.offsetWidth, oh=st.offsetHeight;
   if(mx==null){ mx=r.left+r.width/2; my=r.top+r.height/2; }
   var fx=(sc.scrollLeft+mx-r.left)/old, fy=(sc.scrollTop+my-r.top)/oh;
-  S.fit=false; S.z=Math.max(.25,Math.min(6,v)); st.style.width=(S.z*100)+'%';
+  S.fit=false; S.z=Math.max(.25,Math.min(6,v)); setTimeout(updScaleUI,0); st.style.width=(S.z*100)+'%';
   sc.scrollLeft=fx*st.offsetWidth-(mx-r.left); sc.scrollTop=fy*st.offsetHeight-(my-r.top);
 }
 (function(){
@@ -2556,14 +2590,14 @@ function openRoomForm(line,row){
 
 
 /* ======= перепланировка: снос стен, стирание области, новые стены ======= */
-S.showDemo=true; S.hideReplan=false; S.wallTw=null;
-function isReplan(l){ return l.kind==='demo'||l.kind==='erase'||l.kind==='wall'||l.kind==='opening'; }
+S.showDemo=false; S.hideReplan=false; S.wallTw=null; S.eraserTw=null;
+function isReplan(l){ return l.kind==='demo'||l.kind==='erase'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'; }
 function lineOrder(){
-  function pr(l){ return (l.kind==='erase'||l.kind==='demo'||l.kind==='opening')?0:(l.kind==='wall'?1:2); }
+  function pr(l){ return (l.kind==='erase'||l.kind==='demo'||l.kind==='opening')?0:((l.kind==='wall'||l.kind==='door')?1:2); }
   return Object.keys(S.lines).sort(function(a,b){ return pr(S.lines[a])-pr(S.lines[b]); });
 }
 function lineKindName(l){
-  return {arrow:'Стрелка',zone:'Зона',demo:'Снос стены',opening:'Проём',erase:'Стирание',wall:'Новая стена'}[l.kind]||(l.room?'Помещение':'Линия');
+  return {arrow:'Стрелка',zone:'Зона',demo:'Стёртое',opening:'Проём',erase:'Стирание',wall:'Новая стена',door:'Дверь'}[l.kind]||(l.room?'Помещение':'Линия');
 }
 function defaultTw(){
   if(S.wallTw) return S.wallTw;
@@ -2585,7 +2619,10 @@ function renderWallTw(){
   if(!curPlan()||!curPlan().scaleW) h.appendChild(el('p','hint','Задайте масштаб чертежа — толщина будет в миллиметрах.'));
 }
 function lineHint(){
+  if(S.mode==='free'&&S.lineKind==='demo') return 'Ластик: ведите пальцем по стене, и она будет стёрта. Размер выбирается в меню «Перепланировка». Чертёж двигается двумя пальцами.';
   if(S.mode==='line'){
+    if(S.lineKind==='door') return 'Дверь: нажмите две точки — края проёма. Белый разрыв стены, полотно и дуга открывания появятся сами. Сторону открывания можно перевернуть в карточке.';
+    if(S.lineKind==='wall') return 'Новая стена: нажимайте точки по оси стены, двойное касание или «Готово» завершает. Толщина выбирается в меню «Перепланировка».';
     if(S.lineKind==='room') return 'Обведите помещение: касание в каждом углу, двойное касание или «Готово» завершает контур. Площадь считается по масштабу чертежа.';
     if(S.lineKind==='demo') return 'Снос стены: нажмите точки вдоль стены (начало и конец), двойное касание или «Готово» завершает. Линия закроет стену на чертеже.';
     if(S.lineKind==='opening') return 'Проём: проведите линию поперёк стены по ширине проёма (две точки), двойное касание или «Готово» завершает. Стена на этом месте будет открыта.';
@@ -2601,31 +2638,32 @@ function polyLen(pts,pl){
   return L;
 }
 function replanRows(){
-  var rows=[], T={demo:{n:0,v:0},wall:{n:0,v:0},opening:{n:0,v:0},erase:{n:0,v:0}}, noScale=[];
-  var NAMES={demo:'Снос стен',opening:'Проёмы',erase:'Стирание областей',wall:'Новые стены'};
+  var rows=[], T={demo:{n:0,v:0},wall:{n:0,v:0},opening:{n:0,v:0},erase:{n:0,v:0},door:{n:0,v:0}}, noScale=[];
+  var NAMES={demo:'Стёрто (ластик)',opening:'Проёмы',erase:'Стирание областей',wall:'Новые стены',door:'Двери'};
   plansSorted().forEach(function(pl){
     var ls=Object.keys(S.lines).map(function(k){return S.lines[k]}).filter(function(l){ return l.planId===pl.id&&isReplan(l)&&l.pts&&l.pts.length>=2; });
     if(!ls.length) return;
-    ['demo','opening','erase','wall'].forEach(function(kind){
+    ['demo','opening','erase','wall','door'].forEach(function(kind){
       var g=ls.filter(function(l){ return l.kind===kind; }); if(!g.length) return;
-      var v=0, ok=!!pl.scaleW, thick=[];
+      var v=0, ok=!!pl.scaleW||kind==='door', thick=[];
       g.forEach(function(l){
         if(kind==='erase'){ var a=polyArea(l.pts,pl); if(a!=null) v+=a; }
-        else { var d=polyLen(l.pts,pl); if(d!=null) v+=d; }
+        else if(kind==='door'){ v+=1; } else { var d=polyLen(l.pts,pl); if(d!=null) v+=d; }
         if(pl.scaleW&&l.tw&&(kind==='demo'||kind==='wall')) thick.push(l.tw/VBW*pl.scaleW*1000);
       });
       T[kind].n+=g.length; if(ok) T[kind].v+=v; else if(noScale.indexOf(pl.name)<0) noScale.push(pl.name);
       var note=!ok?'масштаб чертежа не задан':'';
       if(ok&&thick.length){ var avg=thick.reduce(function(a,b){return a+b;},0)/thick.length; note='толщина ≈ '+Math.round(avg/10)*10+' мм'; }
       if(ok&&kind==='opening') note='суммарная ширина';
-      rows.push([pl.name||'Чертёж',NAMES[kind],String(g.length),ok?(fmtNum(v)+(kind==='erase'?' м²':' м')):'—',note]);
+      rows.push([pl.name||'Чертёж',NAMES[kind],String(g.length),kind==='door'?'—':(ok?(fmtNum(v)+(kind==='erase'?' м²':' м')):'—'),kind==='door'?'указаны на плане':note]);
     });
   });
   if(rows.length){
     var parts=[];
-    if(T.demo.n) parts.push('снос стен: '+fmtNum(T.demo.v)+' м');
+    if(T.demo.n) parts.push('стёрто (ластик): '+fmtNum(T.demo.v)+' м');
     if(T.wall.n) parts.push('новые стены: '+fmtNum(T.wall.v)+' м');
     if(T.opening.n) parts.push('проёмы: '+T.opening.n+' шт. ('+fmtNum(T.opening.v)+' м)');
+    if(T.door.n) parts.push('двери: '+T.door.n+' шт.');
     if(T.erase.n) parts.push('стирание областей: '+fmtNum(T.erase.v)+' м²');
     rows.push(['Всего','','','',parts.join('; ')+(noScale.length?' (без чертежей без масштаба: '+noScale.join(', ')+')':'')]);
   }
@@ -2639,11 +2677,42 @@ function drawReplan(g,l,W,H){
     path(true); g.fillStyle='#fff'; g.fill();
     if(S.showDemo!==false){ g.setLineDash([W/150,W/220]); g.strokeStyle='#E11D2E'; g.lineWidth=W/600; path(true); g.stroke(); }
   } else {
-    g.lineCap='butt'; g.lineJoin='miter'; g.strokeStyle=(l.kind==='demo'||l.kind==='opening')?'#fff':(l.color||'#111111'); g.lineWidth=(l.tw||defaultTw())*k;
+    g.lineCap=(l.kind==='demo')?'round':'butt'; g.lineJoin=(l.kind==='demo')?'round':'miter'; g.strokeStyle=(l.kind==='demo'||l.kind==='opening'||l.kind==='door')?'#fff':(l.color||'#111111'); g.lineWidth=(l.tw||defaultTw())*k;
     path(false); g.stroke();
+    if(l.kind==='door'){
+      var dg=doorShape(l,W,H), an0=Math.atan2(dg.by-dg.ay,dg.bx-dg.ax), flip=!!l.flip;
+      g.lineCap='butt'; g.setLineDash([]); g.strokeStyle=l.color||'#1464D7'; g.lineWidth=W/450;
+      g.beginPath(); g.moveTo(dg.ax,dg.ay); g.lineTo(dg.ex,dg.ey); g.stroke();
+      g.setLineDash([W/220,W/300]); g.lineWidth=W/700; g.beginPath(); g.arc(dg.ax,dg.ay,dg.L,an0,an0+(flip?-1:1)*Math.PI/2,flip); g.stroke(); g.setLineDash([]);
+    }
     if((l.kind==='demo'||l.kind==='opening')&&S.showDemo!==false){ g.setLineDash([W/150,W/220]); g.strokeStyle=(l.kind==='opening')?'#1464D7':'#E11D2E'; g.lineWidth=W/600; path(false); g.stroke(); }
   }
   g.restore();
+}
+
+/* ======= v7: ластик, дверь, блок «Масштаб» ======= */
+function eraserPresets(){ return [['тонкий',4],['средний',8],['крупный',14],['очень крупный',22]].map(function(a){ return {label:a[0],tw:a[1]}; }); }
+function renderEraserTw(){
+  var h=$('eraserTw'); if(!h) return; h.innerHTML='';
+  var cur=S.eraserTw||8;
+  eraserPresets().forEach(function(t){
+    var b=el('button','chip',esc(t.label)); b.type='button'; b.setAttribute('aria-pressed',Math.abs(cur-t.tw)<0.01?'true':'false');
+    b.addEventListener('click',function(){ S.eraserTw=t.tw; renderEraserTw(); }); h.appendChild(b);
+  });
+}
+function doorShape(l,w,h){
+  var A=l.pts[0], B=l.pts[1], ax=A[0]*w, ay=A[1]*h, bx=B[0]*w, by=B[1]*h, dx=bx-ax, dy=by-ay, L=Math.hypot(dx,dy)||1;
+  var ux=dx/L, uy=dy/L, sg=l.flip?-1:1, nx=-uy*sg, ny=ux*sg;
+  return {ax:ax,ay:ay,bx:bx,by:by,ex:ax+nx*L,ey:ay+ny*L,L:L,sweep:l.flip?0:1};
+}
+function updScaleUI(){
+  var z=$('zlvl'); if(z) z.textContent=Math.round(S.z*100)+'%';
+  var st=$('scaleSt'), b=$('mScale'), pl=curPlan();
+  if(st&&b){
+    var ok=!!(pl&&pl.scaleW);
+    st.textContent=ok?'ширина чертежа '+fmtNum(pl.scaleW)+' м':'не задан';
+    b.classList.toggle('ok',ok); b.classList.toggle('bad',!ok);
+  }
 }
 /* ---------- init ---------- */
 function renderAll(){ renderOverlay(); renderLists(); renderCard(); }
