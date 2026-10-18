@@ -309,6 +309,8 @@ body.planmode{overflow:hidden}
       <button class="btn" id="mPinPh" aria-pressed="false" title="Поставить маркер и сразу снять фото"><svg viewBox="0 0 24 24"><path d="M5 8h3l1.5-2h5L16 8h3v10H5z"/><circle cx="12" cy="13" r="3"/></svg><span>Маркер+фото</span></button>
       <button class="btn" id="mDraw" aria-pressed="false" title="Линия, от руки, стрелка, зона, текст"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/></svg><span>Рисовать</span></button>
       <button class="btn" id="mReplan" aria-pressed="false" title="Перепланировка: снести стену, стереть область, нарисовать новую стену"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V9h5v11M14 20V5h5v15"/><path d="M8 4l-3 3M5 4l3 3"/></svg><span>Перепланировка</span></button>
+      <button class="btn" id="mBeam" aria-pressed="false" title="Балки на потолке: только высота"><svg viewBox="0 0 24 24"><path d="M3 9h18v4H3z"/><path d="M3 17h18" stroke-dasharray="2 2"/></svg><span>Балки</span></button>
+      <button class="btn" id="mDet" aria-pressed="false" title="Извещатели пожарной сигнализации: точечные, ИПДЛ, ручной"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 2.5"/></svg><span>Извещатели</span></button>
       <button class="btn" id="mSym" aria-pressed="false" title="Условные знаки"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><circle cx="17" cy="7.5" r="3.5"/><path d="M4 20l3.5-6 3.5 6z"/></svg><span>Знаки</span></button>
       <div class="swatches" id="sws" role="group" aria-label="Цвет линии"></div>
       <hr>
@@ -336,6 +338,19 @@ body.planmode{overflow:hidden}
       <hr>
       <label class="chk" style="padding:4px 6px"><input type="checkbox" id="rpShowDemo"> Показывать стёртое пунктиром</label>
       <label class="chk" style="padding:0 6px 6px"><input type="checkbox" id="rpBefore"> Показать «до» (скрыть изменения)</label>
+    </div>
+    <div class="flyout" id="beamMenu" hidden>
+      <span class="hint" style="margin:2px 6px 0">Высота балки, мм (указывается только высота)</span>
+      <div class="chips" id="beamChips" style="padding:2px 6px"></div>
+      <div class="row" style="padding:4px 6px;align-items:center"><input type="text" id="beamIn" inputmode="numeric" placeholder="своя, мм" style="width:110px"><button class="btn small" id="beamGo">Рисовать</button></div>
+    </div>
+    <div class="flyout" id="detMenu" hidden>
+      <button class="btn" id="dSmoke" aria-pressed="false" title="Извещатель пожарный дымовой точечный"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">Д</text></svg>Дымовой (точечный)</button>
+      <button class="btn" id="dHeat" aria-pressed="false" title="Извещатель пожарный тепловой точечный"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">Т</text></svg>Тепловой (точечный)</button>
+      <button class="btn" id="dIpdl" aria-pressed="false" title="Извещатель пожарный дымовой линейный: излучатель и приёмник, две точки"><svg viewBox="0 0 24 24"><rect x="2" y="9" width="5" height="6"/><rect x="17" y="9" width="5" height="6"/><path d="M8 12h8" stroke-dasharray="2 2"/></svg>ИПДЛ (линейный)</button>
+      <button class="btn" id="dMan" aria-pressed="false" title="Извещатель пожарный ручной"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">Р</text></svg>Ручной (ИПР)</button>
+      <hr>
+      <label class="chk" style="padding:4px 6px"><input type="checkbox" id="dZones" checked> Показывать зоны контроля (нужен масштаб)</label>
     </div>
     <div class="zoomc" id="zoomc" role="group" aria-label="Масштаб">
       <button class="btn" id="zout" aria-label="Уменьшить">−</button>
@@ -756,6 +771,8 @@ function newSym(symId,fx,fy){
 function newLine(pts){
   var l={id:uid('l'),pts:pts,kind:(S.lineKind==='room'?'zone':(S.lineKind||'line')),label:'',color:S.color,planId:S.planId,comments:[],upd:Date.now()};
   if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'){ l.tw=(l.kind==='demo')?(S.eraserTw||8):defaultTw(); l.color=(l.kind==='demo')?'#E11D2E':((l.kind==='opening'||l.kind==='door')?'#1464D7':'#111111'); }
+  if(l.kind==='beam'){ l.bh=S.beamH||400; l.color='#8B5E3C'; l.label='h '+l.bh; }
+  if(l.kind==='ipdl'){ l.zw=9; l.color='#9C36B5'; l.label='ИПДЛ'; }
   S.lines[l.id]=l; saveSoon('lines',l.id); return l;
 }
 function getSel(){ return S.pins[S.sel]||S.lines[S.sel]||null; }
@@ -765,6 +782,18 @@ function onPlan(it){ return it.planId===S.planId; }
 /* ---------- rendering: overlay ---------- */
 function renderOverlay(){
   var ov=$('ov'); ov.innerHTML=''; updScaleUI();
+  var zpl=curPlan();
+  if(S.showZones!==false&&zpl&&zpl.scaleW){
+    Object.keys(S.pins).forEach(function(pid){
+      var zp=S.pins[pid]; if(zp.fx==null||!onPlan(zp)||!zp.sym) return;
+      var zi=symInfo(zp.sym), R=zp.rad||zi.r; if(!R) return;
+      var zc=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      zc.setAttribute('cx',(zp.fx*VBW).toFixed(1)); zc.setAttribute('cy',(zp.fy*VBH).toFixed(1)); zc.setAttribute('r',(R/zpl.scaleW*VBW).toFixed(1));
+      zc.setAttribute('fill',zi.color); zc.setAttribute('fill-opacity','.05'); zc.setAttribute('stroke',zi.color); zc.setAttribute('stroke-opacity','.35');
+      zc.setAttribute('stroke-width','1'); zc.setAttribute('stroke-dasharray','3 3'); zc.setAttribute('vector-effect','non-scaling-stroke'); zc.style.pointerEvents='none';
+      ov.appendChild(zc);
+    });
+  }
   lineOrder().forEach(function(id){
     var l=S.lines[id]; if(!l.pts||l.pts.length<2||!onPlan(l)) return;
     if(S.hideReplan&&isReplan(l)) return;
@@ -778,11 +807,28 @@ function renderOverlay(){
       vis.setAttribute('stroke',(l.kind==='demo'||l.kind==='opening'||l.kind==='door')?'#fff':(l.color||'#111111')); vis.setAttribute('stroke-width',l.tw||defaultTw());
       vis.setAttribute('stroke-linecap',l.kind==='demo'?'round':'butt'); vis.setAttribute('stroke-linejoin',l.kind==='demo'?'round':'miter'); vis.style.vectorEffect='none';
     }
+    if(l.kind==='beam'){ vis.setAttribute('stroke-width',S.sel===id?'7':'5'); vis.setAttribute('stroke-opacity','.8'); vis.setAttribute('stroke-linecap','butt'); }
+    if(l.kind==='ipdl'){ vis.setAttribute('stroke-dasharray','8 5'); }
     ov.appendChild(vis);
     if((l.kind==='demo'||l.kind==='erase'||l.kind==='opening')&&S.showDemo!==false){
       var ind=document.createElementNS(NSV,l.kind==='erase'?'polygon':'polyline');
       ind.setAttribute('points',pts); ind.setAttribute('fill','none'); ind.setAttribute('stroke',l.kind==='opening'?'#1464D7':'#E11D2E'); ind.setAttribute('stroke-width',S.sel===id?'3':'1.5');
       ind.setAttribute('stroke-dasharray','6 4'); ind.setAttribute('vector-effect','non-scaling-stroke'); ind.style.pointerEvents='none'; ov.appendChild(ind);
+    }
+    if(l.kind==='ipdl'&&l.pts.length>=2){
+      var q1=l.pts[0], q2=l.pts[l.pts.length-1], x1=q1[0]*VBW, y1=q1[1]*VBH, x2=q2[0]*VBW, y2=q2[1]*VBH, ic=l.color||'#9C36B5';
+      [[x1,y1,'И'],[x2,y2,'П']].forEach(function(e){
+        var rc=document.createElementNS(NSV,'rect'); rc.setAttribute('x',(e[0]-5).toFixed(1)); rc.setAttribute('y',(e[1]-5).toFixed(1)); rc.setAttribute('width','10'); rc.setAttribute('height','10'); rc.setAttribute('rx','1.5'); rc.setAttribute('fill',ic); rc.style.pointerEvents='none'; ov.appendChild(rc);
+        var tx=document.createElementNS(NSV,'text'); tx.setAttribute('x',e[0].toFixed(1)); tx.setAttribute('y',(e[1]+3).toFixed(1)); tx.setAttribute('text-anchor','middle'); tx.setAttribute('font-size','8'); tx.setAttribute('font-weight','700'); tx.setAttribute('fill','#fff'); tx.style.pointerEvents='none'; tx.textContent=e[2]; ov.appendChild(tx);
+      });
+      var ipl=curPlan();
+      if(S.showZones!==false&&ipl&&ipl.scaleW){
+        var hw=(l.zw||9)/2/ipl.scaleW*VBW, ddx=x2-x1, ddy=y2-y1, LL=Math.hypot(ddx,ddy)||1, nx=-ddy/LL*hw, ny=ddx/LL*hw;
+        var band=document.createElementNS(NSV,'polygon');
+        band.setAttribute('points',(x1+nx).toFixed(1)+','+(y1+ny).toFixed(1)+' '+(x2+nx).toFixed(1)+','+(y2+ny).toFixed(1)+' '+(x2-nx).toFixed(1)+','+(y2-ny).toFixed(1)+' '+(x1-nx).toFixed(1)+','+(y1-ny).toFixed(1));
+        band.setAttribute('fill',ic); band.setAttribute('fill-opacity','.05'); band.setAttribute('stroke',ic); band.setAttribute('stroke-opacity','.35'); band.setAttribute('stroke-width','1'); band.setAttribute('stroke-dasharray','3 3'); band.setAttribute('vector-effect','non-scaling-stroke'); band.style.pointerEvents='none';
+        ov.appendChild(band);
+      }
     }
     if(l.kind==='door'){
       var dg=doorShape(l,VBW,VBH), dc=l.color||'#1464D7';
@@ -913,6 +959,12 @@ function renderCard(){
     ss.addEventListener('change',function(){ it.sym=ss.value; touch(it); renderCard(); });
     card.appendChild(field('Условный знак',ss));
   }
+  if(it.sym&&symInfo(it.sym).r){
+    var ri=el('input'); ri.type='text'; ri.inputMode='decimal'; ri.value=it.rad?String(it.rad).replace('.',','):''; ri.placeholder=String(symInfo(it.sym).r).replace('.',',')+' (по умолчанию)'; ri.disabled=S.readOnly;
+    ri.addEventListener('input',function(){ var v=parseFloat(String(ri.value).replace(',','.')); it.rad=v>0?v:null; it.upd=Date.now(); saveSoon('pins',it.id); renderOverlay(); });
+    card.appendChild(field('Радиус зоны контроля, м',ri));
+    var pl2=curPlan(); card.appendChild(el('p','hint',(pl2&&pl2.scaleW?'':'Задайте масштаб чертежа (блок «Масштаб»), чтобы радиус показывался на плане. ')+'Условное значение по умолчанию: уточните по СП 484 (высота потолка, тип извещателя) и паспорту.'));
+  }
   var chk=el('label','chk'); var cb=el('input'); cb.type='checkbox'; cb.checked=!!it.unsure; cb.disabled=S.readOnly; cb.id='fUnsure';
   cb.addEventListener('change',function(){ it.unsure=cb.checked; touch(it); });
   chk.appendChild(cb); chk.appendChild(document.createTextNode('Место на чертеже подтвердить (знак «?»)')); card.appendChild(chk);
@@ -982,8 +1034,9 @@ function renderLineCard(card,l){
     var rr=roomForLine(l);
     card.appendChild(el('p',null,'<b>Помещение</b>: '+esc(rr?roomLabel(rr):'данные не заполнены')));
     var rb=el('button','btn small','Данные помещения'); rb.addEventListener('click',function(){ openRoomForm(l,rr||null); }); card.appendChild(rb);
-  } else card.appendChild(field('Подпись',lb));
-  var ks=el('select'); [['line','Линия'],['arrow','Стрелка'],['zone','Зона (контур)'],['demo','Стёртое (ластик)'],['wall','Новая стена'],['door','Дверь'],['opening','Проём'],['erase','Стирание области']].forEach(function(k){ var o=el('option',null,k[1]); o.value=k[0]; ks.appendChild(o); });
+  } else if(l.kind!=='beam') card.appendChild(field('Подпись',lb));
+  beamIpdlBlock(card,l);
+  var ks=el('select'); [['line','Линия'],['arrow','Стрелка'],['zone','Зона (контур)'],['beam','Балка'],['ipdl','ИПДЛ'],['demo','Стёртое (ластик)'],['wall','Новая стена'],['door','Дверь'],['opening','Проём'],['erase','Стирание области']].forEach(function(k){ var o=el('option',null,k[1]); o.value=k[0]; ks.appendChild(o); });
   ks.value=l.kind||'line'; ks.disabled=S.readOnly; ks.addEventListener('change',function(){ l.kind=ks.value; touch(l); });
   card.appendChild(field('Тип',ks));
   if(l.kind==='demo'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'){
@@ -1076,12 +1129,12 @@ var HINTS={
   free:'Ведите пальцем или мышью по чертежу, чтобы нарисовать линию. Esc отменяет.'
 };
 function setMode(m,o){
-  cancelDraft(); S.mode=m; o=o||{}; S.pinPhoto=!!o.pinPhoto; S.lineKind=o.lineKind||'line';
-  var pr={mSel:m==='sel',mPin:m==='pin'&&!S.pinPhoto,mPinPh:m==='pin'&&S.pinPhoto,mLine:m==='line'&&S.lineKind==='line',mArrow:m==='line'&&S.lineKind==='arrow',mZone:m==='line'&&S.lineKind==='zone',mRoom:m==='line'&&S.lineKind==='room',mDemo:m==='free'&&S.lineKind==='demo',mDoor:m==='line'&&S.lineKind==='door',mErase:m==='line'&&S.lineKind==='erase',mWall:m==='line'&&S.lineKind==='wall',mReplan:(m==='free'&&S.lineKind==='demo')||(m==='line'&&(S.lineKind==='wall'||S.lineKind==='door')),mScale:m==='scale',mFree:m==='free'&&S.lineKind==='line',mText:m==='text',mSym:m==='sym',mDraw:(m==='line'&&S.lineKind!=='wall'&&S.lineKind!=='door')||(m==='free'&&S.lineKind==='line')||m==='text'};
+  cancelDraft(); S.mode=m; o=o||{}; S.pinPhoto=!!o.pinPhoto; S.lineKind=o.lineKind||'line'; S.detMode=!!o.det;
+  var pr={mSel:m==='sel',mPin:m==='pin'&&!S.pinPhoto,mPinPh:m==='pin'&&S.pinPhoto,mLine:m==='line'&&S.lineKind==='line',mArrow:m==='line'&&S.lineKind==='arrow',mZone:m==='line'&&S.lineKind==='zone',mRoom:m==='line'&&S.lineKind==='room',mDemo:m==='free'&&S.lineKind==='demo',mDoor:m==='line'&&S.lineKind==='door',mBeam:m==='line'&&S.lineKind==='beam',mDet:(m==='sym'&&S.detMode)||(m==='line'&&S.lineKind==='ipdl'),dSmoke:m==='sym'&&S.detMode&&S.symId==='ipsmoke',dHeat:m==='sym'&&S.detMode&&S.symId==='ipheat',dMan:m==='sym'&&S.detMode&&S.symId==='ipr',dIpdl:m==='line'&&S.lineKind==='ipdl',mErase:m==='line'&&S.lineKind==='erase',mWall:m==='line'&&S.lineKind==='wall',mReplan:(m==='free'&&S.lineKind==='demo')||(m==='line'&&(S.lineKind==='wall'||S.lineKind==='door')),mScale:m==='scale',mFree:m==='free'&&S.lineKind==='line',mText:m==='text',mSym:m==='sym',mDraw:(m==='line'&&['line','arrow','zone','room'].indexOf(S.lineKind)>=0)||(m==='free'&&S.lineKind==='line')||m==='text'};
   Object.keys(pr).forEach(function(k){ var e=$(k); if(e) e.setAttribute('aria-pressed',pr[k]?'true':'false'); });
-  $('drawMenu').hidden=true; $('replanMenu').hidden=true;
+  $('drawMenu').hidden=true; $('replanMenu').hidden=true; $('beamMenu').hidden=true; $('detMenu').hidden=true;
   $('viewPlan').setAttribute('data-mode',m); renderCard();
-  $('cap').className=(m==='sel')?'':'on'; $('symbar').hidden=(m!=='sym'); if(m==='sym') renderSymBar();
+  $('cap').className=(m==='sel')?'':'on'; $('symbar').hidden=(m!=='sym'||S.detMode); if(m==='sym'&&!S.detMode) renderSymBar();
   $('stage').style.touchAction='none';
   renderHint();
 }
@@ -1115,6 +1168,11 @@ function drawDraft(extra){
 function finishLine(){
   if(!S.draft){ return; }
   var pts=S.draft.pts; cancelDraft();
+  if(S.lineKind==='beam'||S.lineKind==='ipdl'){
+    var kk=S.lineKind;
+    if(pts.length>=2){ newLine([pts[0],pts[pts.length-1]]); feedback('place'); renderOverlay(); renderLists(); }
+    setMode('line',{lineKind:kk}); return;
+  }
   if(S.lineKind==='demo'&&S.mode==='free'){
     if(pts.length===1) pts=[pts[0],[pts[0][0]+0.0004,pts[0][1]]];
     newLine(pts); feedback('place'); renderOverlay(); renderLists(); renderHint(); return;
@@ -1161,11 +1219,11 @@ function finishLine(){
     }
     if(S.mode==='line'){
       var now=Date.now();
-      if(S.draft && now-lastClick<320 && S.lineKind!=='door'){ finishLine(); lastClick=0; return; }
+      if(S.draft && now-lastClick<320 && S.lineKind!=='door' && S.lineKind!=='beam' && S.lineKind!=='ipdl'){ finishLine(); lastClick=0; return; }
       lastClick=now;
       if(!S.draft){ S.draft={pts:[p]}; } else { var last=S.draft.pts[S.draft.pts.length-1]; if(Math.hypot((p[0]-last[0])*VBW,(p[1]-last[1])*VBH)>1.5) S.draft.pts.push(p); }
       drawDraft(); renderHint();
-      if(S.lineKind==='door'&&S.draft&&S.draft.pts.length>=2) finishLine();
+      if((S.lineKind==='door'||S.lineKind==='beam'||S.lineKind==='ipdl')&&S.draft&&S.draft.pts.length>=2) finishLine();
     }
   }
   cap.addEventListener('pointerdown',function(e){
@@ -1222,6 +1280,31 @@ function finishLine(){
   $('mRoom').addEventListener('click',function(){ tgl('line',{lineKind:'room'}); });
   $('mDemo').addEventListener('click',function(){ tgl('free',{lineKind:'demo'}); });
   $('mDoor').addEventListener('click',function(){ tgl('line',{lineKind:'door'}); });
+  function openFly(btn,menu,pre){
+    ['drawMenu','replanMenu','beamMenu','detMenu'].forEach(function(id){ if($(id)!==menu) $(id).hidden=true; });
+    if(!menu.hidden){ menu.hidden=true; return; }
+    if(pre) pre(); menu.hidden=false;
+    var r=btn.getBoundingClientRect(), w=$('viewPlan').getBoundingClientRect();
+    menu.style.left=(r.right-w.left+8)+'px'; menu.style.top=Math.max(8,Math.min(r.top-w.top,w.height-menu.offsetHeight-8))+'px';
+  }
+  function startBeam(h){ if(h>0) S.beamH=h; setMode('line',{lineKind:'beam'}); }
+  $('mBeam').addEventListener('click',function(){
+    if(S.mode==='line'&&S.lineKind==='beam'){ setMode('sel'); return; }
+    openFly(this,$('beamMenu'),renderBeamChips);
+  });
+  $('beamGo').addEventListener('click',function(){ var v=parseFloat(String($('beamIn').value).replace(',','.')); startBeam(v>0?Math.round(v):S.beamH||400); });
+  $('beamIn').addEventListener('keydown',function(e){ if(e.key==='Enter') $('beamGo').click(); });
+  window.startBeam=startBeam;
+  $('mDet').addEventListener('click',function(){
+    if((S.mode==='sym'&&S.detMode)||(S.mode==='line'&&S.lineKind==='ipdl')){ setMode('sel'); return; }
+    openFly(this,$('detMenu'));
+  });
+  function detTgl(id){ if(S.mode==='sym'&&S.detMode&&S.symId===id){ setMode('sel'); return; } S.symId=id; setMode('sym',{det:true}); }
+  $('dSmoke').addEventListener('click',function(){ detTgl('ipsmoke'); });
+  $('dHeat').addEventListener('click',function(){ detTgl('ipheat'); });
+  $('dMan').addEventListener('click',function(){ detTgl('ipr'); });
+  $('dIpdl').addEventListener('click',function(){ tgl('line',{lineKind:'ipdl'}); });
+  $('dZones').addEventListener('change',function(){ S.showZones=this.checked; renderOverlay(); });
   $('mWall').addEventListener('click',function(){ tgl('line',{lineKind:'wall'}); });
   $('mReplan').addEventListener('click',function(){
     var m=$('replanMenu');
@@ -1236,7 +1319,7 @@ function finishLine(){
   $('mScale').addEventListener('click',function(){ tgl('scale'); });
   $('mDraw').addEventListener('click',function(){
     var m=$('drawMenu');
-    if((S.mode==='line'&&S.lineKind!=='wall'&&S.lineKind!=='door')||(S.mode==='free'&&S.lineKind==='line')||S.mode==='text'){ setMode('sel'); return; }
+    if((S.mode==='line'&&['line','arrow','zone','room'].indexOf(S.lineKind)>=0)||(S.mode==='free'&&S.lineKind==='line')||S.mode==='text'){ setMode('sel'); return; }
     if(!m.hidden){ m.hidden=true; return; }
     m.hidden=false;
     var r=$('mDraw').getBoundingClientRect(), w=$('viewPlan').getBoundingClientRect();
@@ -1367,14 +1450,32 @@ function renderPlanCanvas(plan){
     im.onload=function(){
       var W=im.naturalWidth, H=im.naturalHeight, c=document.createElement('canvas'); c.width=W; c.height=H;
       var g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(im,0,0,W,H);
+      if(S.showZones!==false&&plan.scaleW){
+        Object.keys(S.pins).forEach(function(zk){
+          var zp=S.pins[zk]; if(zp.fx==null||zp.planId!==plan.id||!zp.sym) return;
+          var zi=symInfo(zp.sym), R=zp.rad||zi.r; if(!R) return;
+          g.save(); g.beginPath(); g.arc(zp.fx*W,zp.fy*H,R/plan.scaleW*W,0,7); g.globalAlpha=.05; g.fillStyle=zi.color; g.fill(); g.globalAlpha=.4; g.strokeStyle=zi.color; g.lineWidth=W/1500; g.setLineDash([W/300,W/300]); g.stroke(); g.restore();
+        });
+      }
       lineOrder().forEach(function(k){
         var l=S.lines[k]; if(l.planId!==plan.id||!l.pts||l.pts.length<2) return;
         if(S.hideReplan&&isReplan(l)) return;
         if(isReplan(l)){ drawReplan(g,l,W,H); return; }
-        g.strokeStyle=l.color||'#FF7800'; g.lineWidth=W/300; g.lineCap='round'; g.lineJoin='round'; g.beginPath();
+        g.strokeStyle=l.color||'#FF7800'; g.lineWidth=(l.kind==='beam')?W/190:W/300; g.lineCap=(l.kind==='beam')?'butt':'round'; g.lineJoin='round'; g.setLineDash(l.kind==='ipdl'?[W/130,W/220]:[]); g.beginPath();
         l.pts.forEach(function(p,i){ if(i) g.lineTo(p[0]*W,p[1]*H); else g.moveTo(p[0]*W,p[1]*H); });
         if(l.kind==='zone'){ g.closePath(); g.save(); g.globalAlpha=.16; g.fillStyle=l.color||'#FF7800'; g.fill(); g.restore(); }
-        g.stroke();
+        g.stroke(); g.setLineDash([]);
+        if(l.kind==='ipdl'){
+          var i1=l.pts[0], i2=l.pts[l.pts.length-1], ex1=i1[0]*W, ey1=i1[1]*H, ex2=i2[0]*W, ey2=i2[1]*H, sq=W/230;
+          g.fillStyle=l.color||'#9C36B5'; g.fillRect(ex1-sq,ey1-sq,2*sq,2*sq); g.fillRect(ex2-sq,ey2-sq,2*sq,2*sq);
+          g.fillStyle='#fff'; g.font='700 '+(sq*1.5)+'px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('И',ex1,ey1+1); g.fillText('П',ex2,ey2+1);
+          if(S.showZones!==false&&plan.scaleW){
+            var hw2=(l.zw||9)/2/plan.scaleW*W, ddx2=ex2-ex1, ddy2=ey2-ey1, L2=Math.hypot(ddx2,ddy2)||1, nx3=-ddy2/L2*hw2, ny3=ddx2/L2*hw2;
+            g.save(); g.beginPath(); g.moveTo(ex1+nx3,ey1+ny3); g.lineTo(ex2+nx3,ey2+ny3); g.lineTo(ex2-nx3,ey2-ny3); g.lineTo(ex1-nx3,ey1-ny3); g.closePath();
+            g.globalAlpha=.05; g.fillStyle=l.color||'#9C36B5'; g.fill(); g.globalAlpha=.4; g.strokeStyle=l.color||'#9C36B5'; g.lineWidth=W/1500; g.setLineDash([W/300,W/300]); g.stroke(); g.restore();
+          }
+          g.textAlign='left'; g.textBaseline='alphabetic';
+        }
         if(l.kind==='arrow'){
           var qa=l.pts[l.pts.length-2], qb=l.pts[l.pts.length-1], qx=qa[0]*W, qy=qa[1]*H, wx=qb[0]*W, wy=qb[1]*H, ang=Math.atan2(wy-qy,wx-qx), HL=W/70;
           g.beginPath(); g.moveTo(wx,wy); g.lineTo(wx-HL*Math.cos(ang-.45),wy-HL*Math.sin(ang-.45)); g.lineTo(wx-HL*Math.cos(ang+.45),wy-HL*Math.sin(ang+.45)); g.closePath(); g.fillStyle=l.color||'#FF7800'; g.fill();
@@ -2266,6 +2367,10 @@ function appxTables(){
   }
   var rp=replanRows();
   if(rp.rows.length) out.push({title:'Перепланировка: объём изменений',head:['Чертёж','Вид работ','Кол-во','Объём','Примечание'],w:[2300,2500,900,1500,3407],rows:rp.rows,boldLast:true});
+  var dr=detectorRows();
+  if(dr.rows.length) out.push({title:'Пожарная сигнализация: размещение извещателей',head:['Чертёж','Тип','Кол-во','Примечание'],w:[3000,3600,1000,3007],rows:dr.rows,boldLast:true});
+  var br=beamRows();
+  if(br.length) out.push({title:'Балки на потолке',head:['Чертёж','Высота балки','Кол-во','Суммарная длина'],w:[3500,2500,1200,3407],rows:br});
   var rows=checkItems().filter(function(i){ return c.check[i.id]&&c.check[i.id].st; }).map(function(i){ return [i.name,CHK_LBL[c.check[i.id].st],c.check[i.id].note||'']; });
   if(rows.length) out.push({title:'Чек-лист обхода',head:['Объект / узел','Статус','Примечание'],w:[4300,2200,4107],rows:rows});
   return out;
@@ -2590,14 +2695,14 @@ function openRoomForm(line,row){
 
 
 /* ======= перепланировка: снос стен, стирание области, новые стены ======= */
-S.showDemo=false; S.hideReplan=false; S.wallTw=null; S.eraserTw=null;
+S.showDemo=false; S.showZones=true; S.beamH=400; S.detMode=false; S.hideReplan=false; S.wallTw=null; S.eraserTw=null;
 function isReplan(l){ return l.kind==='demo'||l.kind==='erase'||l.kind==='wall'||l.kind==='opening'||l.kind==='door'; }
 function lineOrder(){
   function pr(l){ return (l.kind==='erase'||l.kind==='demo'||l.kind==='opening')?0:((l.kind==='wall'||l.kind==='door')?1:2); }
   return Object.keys(S.lines).sort(function(a,b){ return pr(S.lines[a])-pr(S.lines[b]); });
 }
 function lineKindName(l){
-  return {arrow:'Стрелка',zone:'Зона',demo:'Стёртое',opening:'Проём',erase:'Стирание',wall:'Новая стена',door:'Дверь'}[l.kind]||(l.room?'Помещение':'Линия');
+  return {beam:'Балка',ipdl:'ИПДЛ',arrow:'Стрелка',zone:'Зона',demo:'Стёртое',opening:'Проём',erase:'Стирание',wall:'Новая стена',door:'Дверь'}[l.kind]||(l.room?'Помещение':'Линия');
 }
 function defaultTw(){
   if(S.wallTw) return S.wallTw;
@@ -2621,6 +2726,8 @@ function renderWallTw(){
 function lineHint(){
   if(S.mode==='free'&&S.lineKind==='demo') return 'Ластик: ведите пальцем по стене, и она будет стёрта. Размер выбирается в меню «Перепланировка». Чертёж двигается двумя пальцами.';
   if(S.mode==='line'){
+    if(S.lineKind==='beam') return 'Балка: нажмите две точки вдоль балки. Высота ('+(S.beamH||400)+' мм) берётся из меню «Балки», в карточке её можно изменить. Режим остаётся включённым.';
+    if(S.lineKind==='ipdl') return 'ИПДЛ: нажмите две точки: излучатель и приёмник. Полоса контроля показывается при заданном масштабе. Режим остаётся включённым.';
     if(S.lineKind==='door') return 'Дверь: нажмите две точки — края проёма. Белый разрыв стены, полотно и дуга открывания появятся сами. Сторону открывания можно перевернуть в карточке.';
     if(S.lineKind==='wall') return 'Новая стена: нажимайте точки по оси стены, двойное касание или «Готово» завершает. Толщина выбирается в меню «Перепланировка».';
     if(S.lineKind==='room') return 'Обведите помещение: касание в каждом углу, двойное касание или «Готово» завершает контур. Площадь считается по масштабу чертежа.';
@@ -2713,6 +2820,75 @@ function updScaleUI(){
     st.textContent=ok?'ширина чертежа '+fmtNum(pl.scaleW)+' м':'не задан';
     b.classList.toggle('ok',ok); b.classList.toggle('bad',!ok);
   }
+}
+
+/* ======= v8: балки и извещатели ======= */
+SYMS.unshift(
+  {id:'ipsmoke',name:'Извещатель дымовой (точечный)',g:'Д',color:'#D6336C',sys:['spc'],r:5.2,svg:svgIc('<circle cx="12" cy="12" r="8.5"/><text x="12" y="16.3" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" stroke="none" font-family="sans-serif">Д</text>')},
+  {id:'ipheat',name:'Извещатель тепловой (точечный)',g:'Т',color:'#E8590C',sys:['spc'],r:2.8,svg:svgIc('<circle cx="12" cy="12" r="8.5"/><text x="12" y="16.3" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" stroke="none" font-family="sans-serif">Т</text>')},
+  {id:'ipr',name:'Извещатель ручной (ИПР)',g:'Р',color:'#C92A2A',sys:['spc'],svg:svgIc('<rect x="4" y="4" width="16" height="16" rx="2.5"/><text x="12" y="16.3" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" stroke="none" font-family="sans-serif">Р</text>')}
+);
+var BEAM_H=[200,250,300,400,500,600,800];
+function renderBeamChips(){
+  var h=$('beamChips'); h.innerHTML='';
+  BEAM_H.forEach(function(v){
+    var b=el('button','chip',v+' мм'); b.type='button'; b.setAttribute('aria-pressed',(S.beamH||400)===v?'true':'false');
+    b.addEventListener('click',function(){ window.startBeam(v); }); h.appendChild(b);
+  });
+}
+function beamIpdlBlock(card,l){
+  if(l.kind==='beam'){
+    card.appendChild(el('p',null,'<b>Балка</b> (указывается только высота)'));
+    var hi=el('input'); hi.type='text'; hi.inputMode='numeric'; hi.value=l.bh||''; hi.disabled=S.readOnly;
+    hi.addEventListener('input',function(){ var v=parseFloat(String(hi.value).replace(',','.')); l.bh=v>0?Math.round(v):0; l.label=l.bh?'h '+l.bh:''; l.upd=Date.now(); saveSoon('lines',l.id); renderOverlay(); renderLists(); });
+    card.appendChild(field('Высота балки, мм',hi));
+    var cc=el('div','chips'); BEAM_H.forEach(function(v){ var b=el('button','chip',v+' мм'); b.type='button'; b.disabled=S.readOnly; b.setAttribute('aria-pressed',l.bh===v?'true':'false'); b.addEventListener('click',function(){ l.bh=v; l.label='h '+v; touch(l); renderCard(); }); cc.appendChild(b); });
+    card.appendChild(cc);
+  }
+  if(l.kind==='ipdl'){
+    var zi=el('input'); zi.type='text'; zi.inputMode='decimal'; zi.value=String(l.zw||9).replace('.',','); zi.disabled=S.readOnly;
+    zi.addEventListener('input',function(){ var v=parseFloat(String(zi.value).replace(',','.')); l.zw=v>0?v:9; l.upd=Date.now(); saveSoon('lines',l.id); renderOverlay(); });
+    card.appendChild(field('Ширина контролируемой зоны, м',zi));
+    var ln=polyLen(l.pts,curPlan());
+    card.appendChild(el('p','hint',(ln!=null?'Длина луча: '+fmtNum(ln)+' м. ':'Задайте масштаб, чтобы видеть длину и полосу контроля. ')+'Ширина зоны условная: уточните по СП 484 и паспорту извещателя.'));
+  }
+}
+function detectorRows(){
+  var rows=[], T={ipsmoke:0,ipheat:0,ipr:0,ipdl:0,len:0}, noScale=false;
+  var NM={ipsmoke:'Извещатель дымовой точечный',ipheat:'Извещатель тепловой точечный',ipr:'Извещатель ручной (ИПР)',ipdl:'ИПДЛ (линейный)'};
+  plansSorted().forEach(function(pl){
+    ['ipsmoke','ipheat','ipr'].forEach(function(id){
+      var n=Object.keys(S.pins).filter(function(k){ var p=S.pins[k]; return p.planId===pl.id&&p.fx!=null&&p.sym===id; }).length;
+      if(n){ T[id]+=n; rows.push([pl.name||'Чертёж',NM[id],String(n),id==='ipr'?'':'зона контроля задаётся радиусом на плане']); }
+    });
+    var ls=Object.keys(S.lines).map(function(k){return S.lines[k]}).filter(function(l){ return l.planId===pl.id&&l.kind==='ipdl'; });
+    if(ls.length){
+      var L=0; ls.forEach(function(l){ var d=polyLen(l.pts,pl); if(d!=null) L+=d; else noScale=true; });
+      T.ipdl+=ls.length; T.len+=L;
+      rows.push([pl.name||'Чертёж',NM.ipdl,String(ls.length),pl.scaleW?'длина лучей '+fmtNum(L)+' м':'масштаб не задан']);
+    }
+  });
+  if(rows.length){
+    var parts=[];
+    if(T.ipsmoke) parts.push('дымовых: '+T.ipsmoke);
+    if(T.ipheat) parts.push('тепловых: '+T.ipheat);
+    if(T.ipdl) parts.push('ИПДЛ: '+T.ipdl+(T.len?' ('+fmtNum(T.len)+' м)':''));
+    if(T.ipr) parts.push('ручных: '+T.ipr);
+    rows.push(['Всего','','',parts.join('; ')]);
+  }
+  return {rows:rows};
+}
+function beamRows(){
+  var rows=[];
+  plansSorted().forEach(function(pl){
+    var by={};
+    Object.keys(S.lines).forEach(function(k){ var l=S.lines[k]; if(l.planId===pl.id&&l.kind==='beam'){ var h=l.bh||0; (by[h]=by[h]||[]).push(l); } });
+    Object.keys(by).map(Number).sort(function(a,b){return a-b;}).forEach(function(h){
+      var L=0, ok=!!pl.scaleW; by[h].forEach(function(l){ var d=polyLen(l.pts,pl); if(d!=null) L+=d; });
+      rows.push([pl.name||'Чертёж',h?h+' мм':'не указана',String(by[h].length),ok?fmtNum(L)+' м':'масштаб не задан']);
+    });
+  });
+  return rows;
 }
 /* ---------- init ---------- */
 function renderAll(){ renderOverlay(); renderLists(); renderCard(); }
